@@ -97,7 +97,7 @@ resource "aws_ecs_task_definition" "gatling_aggregate_runner" {
     "image": "${aws_ecr_repository.gatling_aggregate_runner_ecr[0].repository_url}",
     "environment": [
       { "name": "AWS_REGION", "value": "${data.aws_region.current.name}" },
-      { "name": "TW_GATLING_S3_BUCKET_NAME", "value": "${var.gatling_s3_log_bucket_name}" }
+      { "name": "GATLING_S3_BUCKET_NAME", "value": "${var.gatling_s3_log_bucket_name}" }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -130,7 +130,7 @@ resource "aws_ecs_task_definition" "gatling_runner" {
     "image": "${aws_ecr_repository.gatling_runner_ecr[0].repository_url}",
     "environment": [
       { "name": "AWS_REGION", "value": "${data.aws_region.current.name}" },
-      { "name": "TW_GATLING_S3_BUCKET_NAME", "value": "${var.gatling_s3_log_bucket_name}" }
+      { "name": "GATLING_S3_BUCKET_NAME", "value": "${var.gatling_s3_log_bucket_name}" }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",

@@ -5,24 +5,28 @@ import java.util.Date
 
 import com.github.j5ik2o.reactive.aws.ecs.EcsAsyncClient
 import com.github.j5ik2o.reactive.aws.ecs.implicits._
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.{Config, ConfigFactory}
 import net.ceedubs.ficus.Ficus._
 import org.slf4j.LoggerFactory
-import scalaj.http.{ Http, HttpResponse }
+import scalaj.http.{Http, HttpResponse}
 import software.amazon.awssdk.services.ecs.model._
-import software.amazon.awssdk.services.ecs.{ EcsAsyncClient => JavaEcsAsyncClient }
+import software.amazon.awssdk.services.ecs.{
+  EcsAsyncClient => JavaEcsAsyncClient
+}
 
 import scala.collection.JavaConverters._
 import scala.compat.java8.OptionConverters._
 import scala.concurrent.duration.Duration
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 object Runner extends App {
 
-  def sendMessageToSlack(incomingWebhook: String, message: String): HttpResponse[String] = {
+  def sendMessageToSlack(incomingWebhook: String,
+                         message: String): HttpResponse[String] = {
     Http(incomingWebhook)
       .header("Content-type", "application/json")
-      .postData("{\"text\": \"" + message + "\"}").asString
+      .postData("{\"text\": \"" + message + "\"}")
+      .asString
   }
 
 //  def sendMessageToChatwork(message: String, roomId: String, host: String, token: String): HttpResponse[String] = {
@@ -33,14 +37,14 @@ object Runner extends App {
 //  }
 
   def runTask(
-      runTaskEcsClient: EcsAsyncClient,
-      runTaskEcsClusterName: String,
-      runTaskTaskDefinition: String,
-      runTaskCount: Int,
-      runTaskSubnets: Seq[String],
-      runTaskAssignPublicIp: AssignPublicIp,
-      runTaskContainerOverrideName: String,
-      runTaskEnvironments: Map[String, String]
+    runTaskEcsClient: EcsAsyncClient,
+    runTaskEcsClusterName: String,
+    runTaskTaskDefinition: String,
+    runTaskCount: Int,
+    runTaskSubnets: Seq[String],
+    runTaskAssignPublicIp: AssignPublicIp,
+    runTaskContainerOverrideName: String,
+    runTaskEnvironments: Map[String, String]
   )(implicit ec: ExecutionContext): Future[Seq[Task]] = {
     val runTaskRequest = RunTaskRequest
       .builder()
@@ -50,24 +54,35 @@ object Runner extends App {
       .launchType(LaunchType.FARGATE)
       .networkConfiguration(
         NetworkConfiguration
-          .builder().awsvpcConfiguration(
+          .builder()
+          .awsvpcConfiguration(
             AwsVpcConfiguration
               .builder()
               .subnets(runTaskSubnets.asJava)
               .assignPublicIp(runTaskAssignPublicIp)
               .build()
-          ).build()
+          )
+          .build()
       )
       .overrides(
         TaskOverride
-          .builder().containerOverrides(
+          .builder()
+          .containerOverrides(
             ContainerOverride
               .builder()
               .name(runTaskContainerOverrideName)
               .environment(
-                runTaskEnvironments.map { case (k, v) => KeyValuePair.builder().name(k).value(v).build() }.toSeq.asJava
-              ).build()
-          ).build()
+                runTaskEnvironments
+                  .map {
+                    case (k, v) =>
+                      KeyValuePair.builder().name(k).value(v).build()
+                  }
+                  .toSeq
+                  .asJava
+              )
+              .build()
+          )
+          .build()
       )
       .build()
     val future = runTaskEcsClient.runTask(runTaskRequest).flatMap { result =>
@@ -75,44 +90,51 @@ object Runner extends App {
         val tasks = result.tasks().asScala
         Future.successful(tasks)
       } else
-        throw new Exception(result.failures().asScala.map(_.toString()).mkString(","))
+        throw new Exception(
+          result.failures().asScala.map(_.toString()).mkString(",")
+        )
     }
     future
   }
 
-  val now            = new Date
-  val logger         = LoggerFactory.getLogger(getClass)
+  val now = new Date
+  val logger = LoggerFactory.getLogger(getClass)
   val config: Config = ConfigFactory.load()
 
-  val underlying            = JavaEcsAsyncClient.builder().build()
-  val client                = EcsAsyncClient(underlying)
-  val incomingWebhookUrlOpt = config.getAs[String]("gatling.notice.slack.incoming-webhook-url")
+  val underlying = JavaEcsAsyncClient.builder().build()
+  val client = EcsAsyncClient(underlying)
+  val incomingWebhookUrlOpt =
+    config.getAs[String]("gatling.notice.slack.incoming-webhook-url")
   logger.info(s"incomingWebhookUrlOpt = $incomingWebhookUrlOpt")
 
   val runTaskEcsClusterName = config.as[String]("gatling.ecs-cluster-name")
   val runTaskTaskDefinition = config.as[String]("gatling.task-definition")
-  val runTaskCount          = config.as[Int]("gatling.count")
-  val runTaskSubnets        = config.as[Seq[String]]("gatling.subnets")
-  val runTaskAssignPublicIp = AssignPublicIp.valueOf(config.as[String]("gatling.assign-public-ip"))
+  val runTaskCount = config.as[Int]("gatling.count")
+  val runTaskSubnets = config.as[Seq[String]]("gatling.subnets")
+  val runTaskAssignPublicIp =
+    AssignPublicIp.valueOf(config.as[String]("gatling.assign-public-ip"))
 
-  val runTaskLogPrefix             = config.as[String]("gatling.log-prefix")
-  val runTaskContainerOverrideName = config.as[String]("gatling.container-override-name")
+  val runTaskLogPrefix = config.as[String]("gatling.log-prefix")
+  val runTaskContainerOverrideName =
+    config.as[String]("gatling.container-override-name")
 
-  val df              = new SimpleDateFormat("YYYYMMDDHHmmss")
+  val df = new SimpleDateFormat("YYYYMMDDHHmmss")
   val executionIdPath = runTaskLogPrefix + df.format(now) + "-" + now.getTime.toString
 
   logger.info(s"executionIdPath = $executionIdPath")
 
-  val runTaskEnvironments = config.as[Map[String, String]]("gatling.environments") ++ Map(
-      "TW_GATLING_EXECUTION_ID" -> executionIdPath
-    )
+  val runTaskEnvironments = config.as[Map[String, String]](
+    "gatling.environments"
+  ) ++ Map("GATLING_EXECUTION_ID" -> executionIdPath)
 
-  val runTaskReporterTaskDefinition        = config.as[String]("gatling.reporter.task-definition")
-  val runTaskReporterContainerOverrideName = config.as[String]("gatling.reporter.container-override-name")
+  val runTaskReporterTaskDefinition =
+    config.as[String]("gatling.reporter.task-definition")
+  val runTaskReporterContainerOverrideName =
+    config.as[String]("gatling.reporter.container-override-name")
 
-  val runTaskReporterEnvironments = config.as[Map[String, String]]("gatling.reporter.environments") ++ Map(
-      "TW_GATLING_RESULT_DIR_PATH" -> executionIdPath
-    )
+  val runTaskReporterEnvironments = config.as[Map[String, String]](
+    "gatling.reporter.environments"
+  ) ++ Map("GATLING_RESULT_DIR_PATH" -> executionIdPath)
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -120,14 +142,17 @@ object Runner extends App {
     client
       .describeTasks(
         DescribeTasksRequest
-          .builder().cluster(runTaskEcsClusterName).include(TaskField.knownValues()).tasksAsScala(
-            reporterTaskArns
-          ).build()
-      ).flatMap { res =>
-        val list          = res.getValueForField("tasks", classOf[java.util.List[Task]])
+          .builder()
+          .cluster(runTaskEcsClusterName)
+          .include(TaskField.knownValues())
+          .tasksAsScala(reporterTaskArns)
+          .build()
+      )
+      .flatMap { res =>
+        val list = res.getValueForField("tasks", classOf[java.util.List[Task]])
         val reporterTasks = list.asScala.flatMap(_.asScala.toList)
         if (reporterTasks.exists(_.forall(_.lastStatus() == "STOPPED"))) {
-          val bucketName = runTaskEnvironments("TW_GATLING_S3_BUCKET_NAME")
+          val bucketName = runTaskEnvironments("GATLING_S3_BUCKET_NAME")
           logger.info(
             s"Gatling Reporter finished: report url: https://$bucketName.s3.amazonaws.com/$executionIdPath/index.html"
           )
@@ -154,9 +179,14 @@ object Runner extends App {
     client
       .describeTasks(
         DescribeTasksRequest
-          .builder().cluster(runTaskEcsClusterName).include(TaskField.knownValues()).tasksAsScala(taskArns).build()
-      ).flatMap { res =>
-        val list  = res.getValueForField("tasks", classOf[java.util.List[Task]])
+          .builder()
+          .cluster(runTaskEcsClusterName)
+          .include(TaskField.knownValues())
+          .tasksAsScala(taskArns)
+          .build()
+      )
+      .flatMap { res =>
+        val list = res.getValueForField("tasks", classOf[java.util.List[Task]])
         val tasks = list.asScala.flatMap(_.asScala.toList)
         if (tasks.exists(_.forall(_.lastStatus() == "STOPPED"))) {
           logger.info(
@@ -166,7 +196,9 @@ object Runner extends App {
             val response = sendMessageToSlack(
               incomingWebhookUrl,
               s"Gatling Runner finished: task arns = ${taskArns
-                .map(_.split("/")(1)).map(getTaskUrl).mkString("[\n", "\n", "\n]")}"
+                .map(_.split("/")(1))
+                .map(getTaskUrl)
+                .mkString("[\n", "\n", "\n]")}"
             )
             logger.info(s"sendMessage.response = $response")
           }
@@ -182,13 +214,15 @@ object Runner extends App {
             runTaskReporterEnvironments
           ).flatMap { reporterTasks =>
             val reporterTaskArns = reporterTasks.map(_.taskArn())
-            logger.info(
-              s"Gatling Reporter started: task arn = ${getTaskUrl(reporterTaskArns.head.split("/")(1))}\n runTaskReporterEnvironments = $runTaskReporterEnvironments"
-            )
+            logger.info(s"Gatling Reporter started: task arn = ${getTaskUrl(
+              reporterTaskArns.head.split("/")(1)
+            )}\n runTaskReporterEnvironments = $runTaskReporterEnvironments")
             incomingWebhookUrlOpt.foreach { incomingWebhookUrl =>
               val response = sendMessageToSlack(
                 incomingWebhookUrl,
-                s"Gatling Reporter started: task arns = ${getTaskUrl(reporterTaskArns.head.split("/")(1))}\n runTaskReporterEnvironments = $runTaskReporterEnvironments"
+                s"Gatling Reporter started: task arns = ${getTaskUrl(
+                  reporterTaskArns.head.split("/")(1)
+                )}\n runTaskReporterEnvironments = $runTaskReporterEnvironments"
               )
               logger.info(s"sendMessage.response = $response")
             }
@@ -206,18 +240,20 @@ object Runner extends App {
     val n = runTaskCount / 10
     val l = runTaskCount % 10
     Future
-      .traverse(Seq.fill(n)(runTaskCount) ++ (if (l > 0) Seq(l) else Seq.empty)) { count =>
-        runTask(
-          client,
-          runTaskEcsClusterName,
-          runTaskTaskDefinition,
-          count,
-          runTaskSubnets,
-          runTaskAssignPublicIp,
-          runTaskContainerOverrideName,
-          runTaskEnvironments
-        )
-      }.map(_.flatten)
+      .traverse(Seq.fill(n)(runTaskCount) ++ (if (l > 0) Seq(l) else Seq.empty)) {
+        count =>
+          runTask(
+            client,
+            runTaskEcsClusterName,
+            runTaskTaskDefinition,
+            count,
+            runTaskSubnets,
+            runTaskAssignPublicIp,
+            runTaskContainerOverrideName,
+            runTaskEnvironments
+          )
+      }
+      .map(_.flatten)
   } else {
     runTask(
       client,
@@ -240,7 +276,9 @@ object Runner extends App {
       val response = sendMessageToSlack(
         incomingWebhookUrl,
         s"Gatling Runner started: \n task arns = ${taskArns
-          .map(_.split("/")(1)).map(getTaskUrl).mkString("[\n", "\n", "\n]")}\n runTaskCount = $runTaskCount, runTaskEnvironments = $runTaskEnvironments"
+          .map(_.split("/")(1))
+          .map(getTaskUrl)
+          .mkString("[\n", "\n", "\n]")}\n runTaskCount = $runTaskCount, runTaskEnvironments = $runTaskEnvironments"
       )
       logger.info(s"sendMessage.response = $response")
     }

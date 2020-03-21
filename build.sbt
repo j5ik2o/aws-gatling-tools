@@ -36,7 +36,8 @@ val `api-server` = (project in file("api-server"))
     ),
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-http" % "10.1.11",
-      "com.typesafe.akka" %% "akka-stream" % "2.6.4",
+      "com.typesafe.akka" %% "akka-stream" % akka26Version,
+      "com.typesafe.akka" %% "akka-slf4j" % akka26Version,
       "com.github.scopt" %% "scopt" % "4.0.0-RC2",
       "net.logstash.logback" % "logstash-logback-encoder" % "4.11" excludeAll (
         ExclusionRule(
@@ -95,7 +96,7 @@ lazy val `gatling-runner` = (project in file("gatling-runner"))
       Cmd("USER", "root"),
       Cmd("RUN", "mkdir /var/log/gatling"),
       Cmd("RUN", "chown daemon:daemon /var/log/gatling"),
-      Cmd("ENV", "TW_GATLING_RESULT_DIR=/var/log/gatling")
+      Cmd("ENV", "GATLING_RESULT_DIR=/var/log/gatling")
     )
   )
   .dependsOn(`gatling-test` % "compile->gatling-it")

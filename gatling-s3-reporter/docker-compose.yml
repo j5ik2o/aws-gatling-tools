@@ -1,11 +1,11 @@
 version: '2'
 services:
   gatling-s3-reporter:
-    image: j5ik2o/gatling-s3-reporter:latest
+    image: j5ik2o-aws-gatling-tools/gatling-s3-reporter:latest
     environment:
       - AWS_DEFAULT_REGION=ap-northeast-1
-      - AWS_PROFILE=thread-weaver
-      - S3_GATLING_BUCKET_NAME=thread-weaver-gatling-logs
+      - AWS_PROFILE=j5ik2o-aws-gatling-tools
+      - S3_GATLING_BUCKET_NAME=j5ik2o-aws-gatling-tools-gatling-logs
       - S3_GATLING_RESULT_DIR_PATH=default
     volumes:
       - ~/.aws/credentials:/root/.aws/credentials

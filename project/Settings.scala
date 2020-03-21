@@ -34,6 +34,7 @@ object Settings {
   val gatlingVersion = "3.1.0"
   val circeVersion = "0.11.1"
   val awsSdkVersion = "1.11.575"
+  val akka26Version = "2.6.4"
 
   val baseSettings =
     Seq(
@@ -190,12 +191,12 @@ object Settings {
         .build()
       EcsAsyncClient(underlying)
     },
-    runTaskEcsCluster in gatling := "j5ik2o-gatling-ecs",
+    runTaskEcsCluster in gatling := "j5ik2o-aws-gatling-tools-ecs",
     runTaskTaskDefinition in gatling := {
       getTaskDefinitionName(
         (runTaskEcsClient in gatling).value,
         (runTaskAwaitDuration in gatling).value,
-        "j5ik2o-gatling-aggregate-runner"
+        "j5ik2o-aws-gatling-tools-gatling-aggregate-runner"
       )
     },
     runTaskAwaitDuration in gatling := Duration.Inf,
@@ -203,35 +204,35 @@ object Settings {
     runTaskAssignPublicIp in gatling := AssignPublicIp.ENABLED,
     runTaskEnvironments in gatling := Map(
       "AWS_REGION" -> "ap-northeast-1",
-      "TW_GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL" -> sys.env(
-        "TW_GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL"
+      "GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL" -> sys.env(
+        "GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL"
       ),
-      "TW_GATLING_ECS_CLUSTER_NAME" -> (runTaskEcsCluster in gatling).value,
-      "TW_GATLING_SUBNET" -> (runTaskSubnets in gatling).value.head,
-      "TW_GATLING_TASK_DEFINITION" -> {
+      "GATLING_ECS_CLUSTER_NAME" -> (runTaskEcsCluster in gatling).value,
+      "GATLING_SUBNET" -> (runTaskSubnets in gatling).value.head,
+      "GATLING_TASK_DEFINITION" -> {
         getTaskDefinitionName(
           (runTaskEcsClient in gatling).value,
           (runTaskAwaitDuration in gatling).value,
-          "j5ik2o-gatling-runner"
+          "j5ik2o-aws-gatling-tools-gatling-runner"
         )
       },
-      "TW_GATLING_COUNT" -> "10",
-      "TW_GATLING_PAUSE_DURATION" -> "3s",
-      "TW_GATLING_RAMP_DURATION" -> "200s",
-      "TW_GATLING_HOLD_DURATION" -> "5m",
-      "TW_GATLING_TARGET_ENDPOINT_BASE_URL" -> s"http://${sys.env("TW_GATLING_TARGET_HOST")}:8080/v1",
-      "TW_GATLING_SIMULATION_CLASS" -> "com.github.j5ik2o.gatling.BasicSimulation",
-      "TW_GATLING_USERS" -> "10",
-      "TW_GATLING_REPORTER_TASK_DEFINITION" -> {
+      "GATLING_COUNT" -> "10",
+      "GATLING_PAUSE_DURATION" -> "3s",
+      "GATLING_RAMP_DURATION" -> "200s",
+      "GATLING_HOLD_DURATION" -> "5m",
+      "GATLING_TARGET_ENDPOINT_BASE_URL" -> s"http://${sys.env("GATLING_TARGET_HOST")}:8080/hello",
+      "GATLING_SIMULATION_CLASS" -> "com.github.j5ik2o.gatling.BasicSimulation",
+      "GATLING_USERS" -> "10",
+      "GATLING_REPORTER_TASK_DEFINITION" -> {
         getTaskDefinitionName(
           (runTaskEcsClient in gatling).value,
           (runTaskAwaitDuration in gatling).value,
-          "j5ik2o-gatling-s3-reporter"
+          "j5ik2o-aws-gatling-tools-gatling-s3-reporter"
         )
       },
-      "TW_GATLING_BUCKET_NAME" -> "api-server-gatling-logs"
+      "GATLING_BUCKET_NAME" -> "api-server-gatling-logs"
     ),
-    runTaskContainerOverrideName in gatling := "gatling-aggregate-runner",
+    runTaskContainerOverrideName in gatling := "j5ik2o-aws-gatling-tools-gatling-aggregate-runner",
     runTask in gatling := {
       implicit val log = streams.value.log
       val _runTaskEcsClient = (runTaskEcsClient in gatling).value
