@@ -24,7 +24,7 @@ object ApiServer extends App {
       }
     }
 
-  val bindingFuture = Http().bindAndHandle(route, "localhost", 8080).map {
+  val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 8080).map {
     serverBinding =>
       system.log.info(s"Server online at ${serverBinding.localAddress}")
       serverBinding
