@@ -1,16 +1,16 @@
 resource "aws_ecr_repository" "this" {
-  count = "${var.enabled ? 1 : 0}"
-  name = "${var.ecr_name}"
+  count = var.enabled ? 1 : 0
+  name = var.ecr_name
   lifecycle {
     create_before_destroy = true
   }
   tags = {
-    Owner = "${var.owner}"
+    Owner = var.owner
   }
 }
 
 resource "aws_ecr_repository_policy" "this" {
-  count = "${var.enabled ? 1 : 0}"
+  count = var.enabled ? 1 : 0
   policy = <<EOF
 {
     "Version": "2008-10-17",
@@ -40,6 +40,6 @@ resource "aws_ecr_repository_policy" "this" {
 }
 EOF
 
-  repository = "${aws_ecr_repository.this[0].name}"
+  repository = aws_ecr_repository.this[0].name
 }
 

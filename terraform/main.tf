@@ -1,11 +1,11 @@
 terraform {
   required_version = ">= 0.12"
-  backend "s3" {}
+#  backend "s3" {}
 }
 
 provider "aws" {
-  region  = "${var.aws_region}"
-  profile = "${var.aws_profile}"
+  region = "ap-northeast-1"
+  profile = "aws-gatling-tools"
 }
 
 data "aws_availability_zones" "available" {
@@ -27,11 +27,11 @@ data "aws_security_group" "default" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "${var.vpc_name}"
-  cidr = "${var.vpc_cidr}"
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 
   azs              = data.aws_availability_zones.available.names
-  public_subnets   = "${var.aws_subnet_private}"
+  public_subnets   = var.aws_subnet_public
 
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -51,25 +51,23 @@ module "vpc" {
 
 module "ecr_api_server" {
   source   = "./ecr"
-  prefix   = "${var.prefix}"
-  owner    = "${var.owner}"
+  prefix   = var.prefix
+  owner    = var.owner
   enabled  = true
-  ecr_name = "j5ik2o/api-server"
+  ecr_name = var.api_server_ecr_name
 }
 
 module "gatling" {
   source     = "./gatling"
   enabled    = true
-  aws_region = "${var.aws_region}"
-  prefix     = "${var.prefix}"
-  owner      = "${var.owner}"
+  prefix     = var.prefix
+  owner      = var.owner
 
-  gatling_ecs_cluster_name          = "${var.gatling_ecs_cluster_name}"
-  gatling_runner_ecr_name           = "${var.gatling_runner_ecr_name}"
-  gatling_aggregate_runner_ecr_name = "${var.gatling_aggregate_runner_ecr_name}"
+  gatling_ecs_cluster_name          = var.gatling_ecs_cluster_name
+  gatling_runner_ecr_name           = var.gatling_runner_ecr_name
+  gatling_aggregate_runner_ecr_name = var.gatling_aggregate_runner_ecr_name
 
-  gatling_s3_reporter_ecr_name = "${var.gatling_s3_reporter_ecr_name}"
-  gatling_s3_log_bucket_name   = "${var.gatling_s3_log_bucket_name}"
+  gatling_s3_reporter_ecr_name = var.gatling_s3_reporter_ecr_name
+  gatling_s3_log_bucket_name   = var.gatling_s3_log_bucket_name
 
-  gatling_dd_api_key = "${var.gatling_dd_api_key}"
 }
