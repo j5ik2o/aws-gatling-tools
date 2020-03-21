@@ -1,0 +1,17 @@
+version: '2'
+services:
+  gatling-runner:
+    image: j5ik2o/thread-weaver-gatling-runner:latest
+    environment:
+      - AWS_REGION=ap-northeast-1
+      - AWS_PROFILE=thread-weaver
+      - TW_GATLING_SIMULATION_CLASS=com.github.j5ik2o.gatling.ThreadSimulation
+      - TW_GATLING_EXECUTION_ID=default
+      - TW_GATLING_USERS=1
+      - TW_GATLING_RAMP_DURATION=1m
+      - TW_GATLING_HOLD_DURATION=2m
+      - TW_GATLING_S3_BUCKET_NAME=thread-weaver-gatling-logs
+      - TW_GATLING_RESULT_DIR=target/gatling
+      - TW_GATLING_ENDPOINT_BASE_URL=http://10.0.1.7:18080/v1
+    volumes:
+      - ~/.aws/credentials:/root/.aws/credentials
