@@ -1,16 +1,18 @@
-prefix = "j5ik2o"
+prefix = "j5ik2o-aws-gatling-tools"
 owner = "j5ik2o"
+
+account_id = "XXXXXX"
 
 vpc_name = "j5ik2o-vpc"
 
 aws_az = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
 aws_subnet_public = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
 
-gatling_ecs_cluster_name = "j5ik2o-aws-gatling-tools-ecs"
-
+api_server_ecs_cluster_name = "j5ik2o-api-server-ecs"
 api_server_ecr_name = "j5ik2o-aws-gatling-tools/api-server"
+
+gatling_ecs_cluster_name = "j5ik2o-aws-gatling-tools-ecs"
 gatling_runner_ecr_name = "j5ik2o-aws-gatling-tools/gatling-runner"
-gatling_s3_reporter_ecr_name = "j5ik2o-aws-gatling-tools/gatling-s3-repoter"
+gatling_s3_reporter_ecr_name = "j5ik2o-aws-gatling-tools/gatling-s3-reporter"
 gatling_aggregate_runner_ecr_name = "j5ik2o-aws-gatling-tools/gatling-aggregate-runner"
 gatling_s3_log_bucket_name = "j5ik2o-aws-gatling-tools-logs"
-
