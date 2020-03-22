@@ -24,11 +24,13 @@ STATUS: WIP
 $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt gatling-runner/ecr:push
 
 # gatling-s3-reporter docker build & push
-$ cd gatling-s3-reporter
-gatling-s3-reporter $ make release
+$ cd gatling-s3-reporter && make release && cd ..
 
 # gatling-aggregate-runner build & push
 $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt gatling-aggregate-runner/ecr:push
+
+# api-server docker build & push
+$ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt api-server/ecr:push
 ```
 
 ## How to run a stress-test
