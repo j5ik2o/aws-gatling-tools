@@ -1,9 +1,13 @@
+output "api_server_ecs_cluster_name" {
+  value = module.ecr_api_server.api_server_ecs_cluster_name
+}
+
 output "api_server_ecr_repository_arn" {
-  value = module.ecr_api_server.ecr_repository_arn
+  value = module.ecr_api_server.api_server_ecr_arn
 }
 
 output "api_server_ecr_repository_url" {
-  value = module.ecr_api_server.ecr_repository_url
+  value = module.ecr_api_server.api_server_ecr_repository_url
 }
 
 output "gatling_ecs_cluster_name" {
