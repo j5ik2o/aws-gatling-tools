@@ -17,7 +17,23 @@ STATUS: WIP
     region = ap-northeast-1 
     ```
 
-## How to build
+## How to build the AWS environment
+
+```sh
+$ cp terraform.tfvars.default terraform.tfvars
+$ terraform init
+$ terraform plan
+$ terraform apply
+```
+
+## How to build the test application
+
+```sh
+# api-server docker build & push
+$ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt api-server/ecr:push
+```
+
+## How to build the stress-test tools
 
 ```sh
 # gatling-runner docker build & push
@@ -28,9 +44,6 @@ $ cd gatling-s3-reporter && make release && cd ..
 
 # gatling-aggregate-runner build & push
 $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt gatling-aggregate-runner/ecr:push
-
-# api-server docker build & push
-$ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt api-server/ecr:push
 ```
 
 ## How to run a stress-test
@@ -38,6 +51,6 @@ $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt api-server/ecr:push
 ```sh
 $ AWS_PROFILE=aws-gatling-tools \
     GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL=https://hooks.slack.com/services/xxxxx \
-    GATLING_TARGET_HOST=XXXXX.XXXXXX.XXXXX \
+    GATLING_TARGET_HOST=http://XXXXX.XXXXXX.XXXXX/hello \
     sbt gatling-aggregate-runner/gatling::runTask
 ```
