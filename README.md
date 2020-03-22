@@ -20,10 +20,11 @@ STATUS: WIP
 ## How to build the AWS environment
 
 ```sh
-$ cp terraform.tfvars.default terraform.tfvars
-$ terraform init
-$ terraform plan
-$ terraform apply
+$ cd terraform
+terraform $ cp terraform.tfvars.default terraform.tfvars
+terraform $ terraform init
+terraform $ terraform plan
+terraform $ terraform apply
 ```
 
 ## How to build the test application
