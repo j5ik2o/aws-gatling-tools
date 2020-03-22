@@ -3,7 +3,7 @@
 ## How to prepare
 
 ```sh
-$ brew install awscli jq
+$ brew install sbt awscli jq
 ```
 
 ## How to build
