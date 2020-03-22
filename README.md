@@ -1,6 +1,6 @@
 # aws-gatling-tools
 
-aws-gatling-tools is the stress-test tool used by gatling.
+aws-gatling-tools is the aws stress-test tool used by gatling.
 
 STATUS: WIP
 
