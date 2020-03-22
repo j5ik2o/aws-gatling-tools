@@ -1,5 +1,5 @@
+variable "account_id" {}
 variable "prefix" {}
-
 variable "owner" {}
 
 variable "aws_az" {

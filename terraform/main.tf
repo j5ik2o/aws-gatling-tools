@@ -49,21 +49,16 @@ module "vpc" {
   }
 }
 
-//module "ecr_api_server" {
-//  source   = "./ecr"
-//  prefix   = var.prefix
-//  owner    = var.owner
-//  enabled  = true
-//  ecr_name = var.api_server_ecr_name
-//}
-
 module "ecr_api_server" {
   source   = "./api-server"
   prefix   = var.prefix
   owner    = var.owner
-  enabled  = true
+  vpc_id = module.vpc.vpc_id
+  subnet_ids = module.vpc.public_subnets
+  aws_subnet_public = var.aws_subnet_public
   api_server_ecs_cluster_name = var.api_server_ecs_cluster_name
   api_server_ecr_name = var.api_server_ecr_name
+  aws_account_id = var.account_id
 }
 
 module "gatling" {
