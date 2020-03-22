@@ -4,7 +4,7 @@ aws-gatling-tools is the aws stress-test tool used by gatling.
 
 STATUS: WIP
 
-[](doc/system-layout.png)
+! [](doc/system-layout.png)
 
 ## How to prepare
 
