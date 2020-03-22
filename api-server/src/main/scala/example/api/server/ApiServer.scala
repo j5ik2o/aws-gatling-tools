@@ -15,16 +15,11 @@ object ApiServer extends App {
   val route =
     path("hello") {
       get {
-        complete(
-          HttpEntity(
-            ContentTypes.`text/html(UTF-8)`,
-            "<h1>Say hello to akka-http</h1>"
-          )
-        )
+        complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "ok"))
       }
     }
 
-  val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 8080).map {
+  val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 80).map {
     serverBinding =>
       system.log.info(s"Server online at ${serverBinding.localAddress}")
       serverBinding

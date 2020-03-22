@@ -70,14 +70,6 @@ object Settings {
       )
     )
 
-  val ecrSettings = Seq(
-    region in Ecr := Region.getRegion(Regions.AP_NORTHEAST_1),
-    repositoryName in Ecr := "j5ik2o/api-server",
-    repositoryTags in Ecr ++= Seq(version.value),
-    localDockerImage in Ecr := "j5ik2o/" + (packageName in Docker).value + ":" + (version in Docker).value,
-    push in Ecr := ((push in Ecr) dependsOn (publishLocal in Docker, login in Ecr)).value
-  )
-
   lazy val dockerCommonSettings = Seq(
     dockerBaseImage := "adoptopenjdk/openjdk8:x86_64-alpine-jdk8u191-b12",
     maintainer in Docker := "Junichi Kato <j5ik2o@gmail.com>",
@@ -123,6 +115,15 @@ object Settings {
       "-Ywarn-numeric-widen"
     )
   )
+
+  val apiServerEcrSettings = Seq(
+    region in Ecr := Region.getRegion(Regions.AP_NORTHEAST_1),
+    repositoryName in Ecr := "j5ik2o-aws-gatling-tools/api-server",
+    repositoryTags in Ecr ++= Seq(version.value),
+    localDockerImage in Ecr := "j5ik2o/" + (packageName in Docker).value + ":" + (version in Docker).value,
+    push in Ecr := ((push in Ecr) dependsOn (publishLocal in Docker, login in Ecr)).value
+  )
+
   lazy val gatlingRunnerEcrSettings = Seq(
     region in Ecr := Region.getRegion(Regions.AP_NORTHEAST_1),
     repositoryName in Ecr := "j5ik2o-aws-gatling-tools/gatling-runner",
