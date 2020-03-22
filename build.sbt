@@ -58,7 +58,7 @@ lazy val `gatling-test` = (project in file("gatling-test"))
   .enablePlugins(GatlingPlugin)
   .settings(gatlingCommonSettings)
   .settings(
-    name := "api-server-gatling-test",
+    name := "gatling-test",
     libraryDependencies ++= Seq(
       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion,
       "io.gatling" % "gatling-test-framework" % gatlingVersion,
@@ -79,7 +79,7 @@ lazy val `gatling-runner` = (project in file("gatling-runner"))
   .settings(gatlingCommonSettings)
   .settings(gatlingRunnerEcrSettings)
   .settings(
-    name := "api-server-gatling-runner",
+    name := "gatling-runner",
     libraryDependencies ++= Seq(
       "io.gatling" % "gatling-app" % gatlingVersion,
       "com.amazonaws" % "aws-java-sdk-core" % awsSdkVersion,
@@ -90,7 +90,7 @@ lazy val `gatling-runner` = (project in file("gatling-runner"))
     ),
     dockerBaseImage := "openjdk:8",
     dockerUsername := Some("j5ik2o"),
-    packageName in Docker := "api-server-gatling-runner",
+    packageName in Docker := "gatling-runner",
     dockerUpdateLatest := true,
     dockerCommands ++= Seq(
       Cmd("USER", "root"),
@@ -102,7 +102,7 @@ lazy val `gatling-runner` = (project in file("gatling-runner"))
   .dependsOn(`gatling-test` % "compile->gatling-it")
 
 lazy val `gatling-s3-reporter` = (project in file("gatling-s3-reporter"))
-  .settings(name := "api-server-gatling-s3-reporter")
+  .settings(name := "gatling-s3-reporter")
 
 lazy val `gatling-aggregate-runner` =
   (project in file("gatling-aggregate-runner"))
@@ -111,13 +111,13 @@ lazy val `gatling-aggregate-runner` =
     .settings(gatlingAggregateRunnerEcrSettings)
     .settings(gatlingAggregateRunTaskSettings)
     .settings(
-      name := "api-server-gatling-aggregate-runner",
+      name := "gatling-aggregate-runner",
       mainClass in (Compile, bashScriptDefines) := Some(
         "com.github.j5ik2o.gatling.runner.Runner"
       ),
       dockerBaseImage := "openjdk:8",
       dockerUsername := Some("j5ik2o"),
-      packageName in Docker := "api-server-gatling-aggregate-runner",
+      packageName in Docker := "gatling-aggregate-runner",
       dockerUpdateLatest := true,
       libraryDependencies ++= Seq(
         "org.slf4j" % "slf4j-api" % "1.7.26",
