@@ -10,14 +10,14 @@ val `api-server` = (project in file("api-server"))
   .enablePlugins(AshScriptPlugin, JavaAgent, EcrPlugin)
   .settings(baseSettings)
   .settings(dockerCommonSettings)
-  .settings(ecrSettings)
+  .settings(apiServerEcrSettings)
   .settings(
     name := "api-server",
     mainClass in (Compile, run) := Some("example.api.server.ApiServer"),
     mainClass in reStart := Some("example.api.server.ApiServer"),
     dockerEntrypoint := Seq("/opt/docker/bin/api-server"),
     dockerUsername := Some("j5ik2o"),
-    dockerExposedPorts ++= Seq(8080),
+    dockerExposedPorts ++= Seq(80),
     fork in run := true,
     javaAgents += "org.aspectj" % "aspectjweaver" % "1.8.13",
     javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "runtime;test",
