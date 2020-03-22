@@ -1,5 +1,11 @@
 # aws-gatling-tools
 
+## How to prepare
+
+```sh
+$ brew install awscli jq
+```
+
 ## How to build
 
 ```sh
