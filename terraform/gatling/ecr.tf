@@ -13,7 +13,7 @@ resource "aws_ecr_repository_policy" "gatling_runner_ecr_policy" {
     "Version": "2008-10-17",
     "Statement": [
         {
-            "Sid": "gaudi-poc-gatling-ecs-runner-ecr",
+            "Sid": "gatling-runner-ecr",
             "Effect": "Allow",
             "Principal": "*",
             "Action": [
@@ -58,7 +58,7 @@ resource "aws_ecr_repository_policy" "gatling_s3_reporter_ecr_policy" {
     "Version": "2008-10-17",
     "Statement": [
         {
-            "Sid": "thread-weaver-gatling-ecs-s3-reporter-ecr",
+            "Sid": "gatling-s3-reporter-ecr",
             "Effect": "Allow",
             "Principal": "*",
             "Action": [
@@ -103,7 +103,7 @@ resource "aws_ecr_repository_policy" "gatling_aggregate_runner_ecr_policy" {
     "Version": "2008-10-17",
     "Statement": [
         {
-            "Sid": "thread-weaver-gatling-ecs-aggregate-runner-ecr",
+            "Sid": "gatling-aggregate-runner-ecr",
             "Effect": "Allow",
             "Principal": "*",
             "Action": [
