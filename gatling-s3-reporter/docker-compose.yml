@@ -4,7 +4,7 @@ services:
     image: j5ik2o-aws-gatling-tools/gatling-s3-reporter:latest
     environment:
       - AWS_DEFAULT_REGION=ap-northeast-1
-      - AWS_PROFILE=j5ik2o-aws-gatling-tools
+      - AWS_PROFILE=aws-gatling-tools
       - S3_GATLING_BUCKET_NAME=j5ik2o-aws-gatling-tools-gatling-logs
       - S3_GATLING_RESULT_DIR_PATH=default
     volumes:

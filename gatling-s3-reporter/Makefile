@@ -1,3 +1,5 @@
+# aws-cli/2.0.4 Python/3.8.2 Darwin/19.3.0 botocore/2.0.0dev8
+
 # import config.
 # You can change the default config with `make cnf="config_special.env" build`
 cnf ?= config.env
@@ -68,21 +70,23 @@ tag-version: ## Generate container `latest` tag
 	@echo 'create tag $(VERSION)'
 	docker tag $(APP_NAME) $(DOCKER_REPO)/$(APP_NAME):$(VERSION)
 
-# HELPERS
-
 # generate script to login to aws docker repo
-CMD_REPOLOGIN := "eval $$\( aws ecr"
+CMD_REPOLOGIN := "aws ecr get-login-password"
 ifdef AWS_CLI_PROFILE
 CMD_REPOLOGIN += " --profile $(AWS_CLI_PROFILE)"
 endif
 ifdef AWS_CLI_REGION
 CMD_REPOLOGIN += " --region $(AWS_CLI_REGION)"
 endif
-CMD_REPOLOGIN += " get-login --no-include-email \)"
+CMD_REPOLOGIN += " | docker login --username AWS --password-stdin $(ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com/$(APP_NAME)"
 
 # login to AWS-ECR
 repo-login: ## Auto login to AWS-ECR unsing aws-cli
 	@eval $(CMD_REPOLOGIN)
+
+# HELPERS
+account-id: ## Output the current version
+	@echo $(ACCOUNT_ID)
 
 version: ## Output the current version
 	@echo $(VERSION)
