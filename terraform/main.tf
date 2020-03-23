@@ -49,6 +49,7 @@ module "vpc" {
   }
 }
 
+# for test application
 module "ecr_api_server" {
   source   = "./api-server"
   prefix   = var.prefix
