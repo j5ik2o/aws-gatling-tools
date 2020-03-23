@@ -1,3 +1,6 @@
+output "api_server_alb_dns" {
+  value = module.ecr_api_server.api_server_alb_dns_name
+}
 output "api_server_ecs_cluster_name" {
   value = module.ecr_api_server.api_server_ecs_cluster_name
 }

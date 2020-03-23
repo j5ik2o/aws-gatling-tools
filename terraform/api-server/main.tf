@@ -232,8 +232,5 @@ resource "aws_ecs_service" "main" {
     container_port = "8080"
   }
 
-  tags = {
-    Owner = var.owner
-  }
 }
 
