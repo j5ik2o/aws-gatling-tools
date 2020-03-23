@@ -29,12 +29,17 @@ object Runner extends App {
       .asString
   }
 
-//  def sendMessageToChatwork(message: String, roomId: String, host: String, token: String): HttpResponse[String] = {
-//    val url = s"$host/v2/rooms/$roomId/messages"
-//    logger.info(s"sending url = $url")
-//    Http(url)
-//      .header("X-ChatWorkToken", token).postForm(Seq("body" -> message, "self_unread" -> "0")).asString
-//  }
+  def sendMessageToChatwork(roomId: String,
+                            host: String,
+                            token: String,
+                            message: String): HttpResponse[String] = {
+    val url = s"$host/v2/rooms/$roomId/messages"
+    logger.info(s"sending url = $url")
+    Http(url)
+      .header("X-ChatWorkToken", token)
+      .postForm(Seq("body" -> message, "self_unread" -> "0"))
+      .asString
+  }
 
   def runTask(
     runTaskEcsClient: EcsAsyncClient,
@@ -107,6 +112,10 @@ object Runner extends App {
     config.getAs[String]("gatling.notice.slack.incoming-webhook-url")
   logger.info(s"incomingWebhookUrlOpt = $incomingWebhookUrlOpt")
 
+  val hostOpt = config.getAs[String]("gatling.notice.chatwork.host")
+  val roomIdOpt = config.getAs[String]("gatling.notice.chatwork.room-id")
+  val tokenOpt = config.getAs[String]("gatling.notice.chatwork.token")
+
   val runTaskEcsClusterName = config.as[String]("gatling.ecs-cluster-name")
   val runTaskTaskDefinition = config.as[String]("gatling.task-definition")
   val runTaskCount = config.as[Int]("gatling.count")
@@ -153,16 +162,11 @@ object Runner extends App {
         val reporterTasks = list.asScala.flatMap(_.asScala.toList)
         if (reporterTasks.exists(_.forall(_.lastStatus() == "STOPPED"))) {
           val bucketName = runTaskEnvironments("GATLING_S3_BUCKET_NAME")
-          logger.info(
+          val message =
             s"Gatling Reporter finished: report url: https://$bucketName.s3.amazonaws.com/$executionIdPath/index.html"
-          )
-          incomingWebhookUrlOpt.foreach { incomingWebhookUrl =>
-            val response = sendMessageToSlack(
-              incomingWebhookUrl,
-              s"Gatling Reporter finished: report url: https://$bucketName.s3.amazonaws.com/$executionIdPath/index.html"
-            )
-            logger.info(s"sendMessage.response = $response")
-          }
+          logger.info(message)
+          sendMessageToChatwork(message)
+          sendMessagesToSlack(message)
           Future.successful(())
         } else {
           logger.info("---")
@@ -189,19 +193,13 @@ object Runner extends App {
         val list = res.getValueForField("tasks", classOf[java.util.List[Task]])
         val tasks = list.asScala.flatMap(_.asScala.toList)
         if (tasks.exists(_.forall(_.lastStatus() == "STOPPED"))) {
-          logger.info(
-            s"Gatling Runner finished: task arns = ${taskArns.map(_.split("/")(1)).map(getTaskUrl).mkString(",")}"
-          )
-          incomingWebhookUrlOpt.foreach { incomingWebhookUrl =>
-            val response = sendMessageToSlack(
-              incomingWebhookUrl,
-              s"Gatling Runner finished: task arns = ${taskArns
-                .map(_.split("/")(1))
-                .map(getTaskUrl)
-                .mkString("[\n", "\n", "\n]")}"
-            )
-            logger.info(s"sendMessage.response = $response")
-          }
+          val message = s"Gatling Runner finished: task arns = ${taskArns
+            .map(_.split("/")(1))
+            .map(getTaskUrl)
+            .mkString("[\n", "\n", "\n]")}"
+          logger.info(message)
+          sendMessageToChatwork(message)
+          sendMessagesToSlack(message)
           Thread.sleep(1000)
           runTask(
             client,
@@ -214,18 +212,12 @@ object Runner extends App {
             runTaskReporterEnvironments
           ).flatMap { reporterTasks =>
             val reporterTaskArns = reporterTasks.map(_.taskArn())
-            logger.info(s"Gatling Reporter started: task arn = ${getTaskUrl(
+            val message = s"Gatling Reporter started: task arns = ${getTaskUrl(
               reporterTaskArns.head.split("/")(1)
-            )}\n runTaskReporterEnvironments = $runTaskReporterEnvironments")
-            incomingWebhookUrlOpt.foreach { incomingWebhookUrl =>
-              val response = sendMessageToSlack(
-                incomingWebhookUrl,
-                s"Gatling Reporter started: task arns = ${getTaskUrl(
-                  reporterTaskArns.head.split("/")(1)
-                )}\n runTaskReporterEnvironments = $runTaskReporterEnvironments"
-              )
-              logger.info(s"sendMessage.response = $response")
-            }
+            )}\n runTaskReporterEnvironments = $runTaskReporterEnvironments"
+            logger.info(message)
+            sendMessageToChatwork(message)
+            sendMessagesToSlack(message)
             gatlingS3ReporterLoop(reporterTaskArns)
           }
         } else {
@@ -269,20 +261,34 @@ object Runner extends App {
 
   val future = futureTasks.flatMap { tasks =>
     val taskArns = tasks.map(_.taskArn())
-    logger.info(
-      s"Gatling Runner started: task arns = ${taskArns.map(_.split("/")(1)).map(getTaskUrl).mkString(",")}\n runTaskEnvironments = $runTaskEnvironments"
-    )
-    incomingWebhookUrlOpt.foreach { incomingWebhookUrl =>
-      val response = sendMessageToSlack(
-        incomingWebhookUrl,
-        s"Gatling Runner started: \n task arns = ${taskArns
-          .map(_.split("/")(1))
-          .map(getTaskUrl)
-          .mkString("[\n", "\n", "\n]")}\n runTaskCount = $runTaskCount, runTaskEnvironments = $runTaskEnvironments"
-      )
-      logger.info(s"sendMessage.response = $response")
-    }
+    val message = s"Gatling Runner started: \n task arns = ${taskArns
+      .map(_.split("/")(1))
+      .map(getTaskUrl)
+      .mkString("[\n", "\n", "\n]")}\n runTaskCount = $runTaskCount, runTaskEnvironments = $runTaskEnvironments"
+    logger.info(message)
+    sendMessageToChatwork(message)
+    sendMessagesToSlack(message)
     gatlingTaskLoop(taskArns)
   }
+
+  private def sendMessageToChatwork(message: String): Unit = {
+    (hostOpt, roomIdOpt, tokenOpt) match {
+      case (Some(h), Some(r), Some(t))
+          if h.nonEmpty && r.nonEmpty && t.nonEmpty =>
+        val response = sendMessageToChatwork(h, r, t, message)
+        logger.info(s"sendMessageToChatwork.response = $response")
+      case _ =>
+    }
+  }
+
+  private def sendMessagesToSlack(message: String): Unit = {
+    incomingWebhookUrlOpt match {
+      case Some(incomingWebhookUrl) if incomingWebhookUrl.nonEmpty =>
+        val response = sendMessageToSlack(incomingWebhookUrl, message)
+        logger.info(s"sendMessageToSlack.response = $response")
+      case _ =>
+    }
+  }
+
   Await.result(future, Duration.Inf)
 }
