@@ -201,7 +201,7 @@ object Settings {
       )
     },
     runTaskAwaitDuration in gatling := Duration.Inf,
-    runTaskSubnets in gatling := Seq("subnet-096d7af9e31f4f8c7"), // 10.0.1.0/24 public
+    runTaskSubnets in gatling := Seq("subnet-00ef5bc53cf992ab4"), // 10.0.1.0/24 public
     runTaskAssignPublicIp in gatling := AssignPublicIp.ENABLED,
     runTaskEnvironments in gatling := Map(
       "AWS_REGION" -> "ap-northeast-1",
@@ -233,7 +233,7 @@ object Settings {
       },
       "GATLING_BUCKET_NAME" -> "api-server-gatling-logs"
     ),
-    runTaskContainerOverrideName in gatling := "j5ik2o-aws-gatling-tools-gatling-aggregate-runner",
+    runTaskContainerOverrideName in gatling := "gatling-aggregate-runner",
     runTask in gatling := {
       implicit val log = streams.value.log
       val _runTaskEcsClient = (runTaskEcsClient in gatling).value

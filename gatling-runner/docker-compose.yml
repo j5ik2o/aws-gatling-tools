@@ -4,7 +4,7 @@ services:
     image: j5ik2o-aws-gatling-tools/gatling-runner:latest
     environment:
       - AWS_REGION=ap-northeast-1
-      - AWS_PROFILE=thread-weaver
+      - AWS_PROFILE=aws-gatling-tools
       - GATLING_SIMULATION_CLASS=com.github.j5ik2o.gatling.BasicSimulation
       - GATLING_EXECUTION_ID=default
       - GATLING_USERS=1
