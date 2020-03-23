@@ -12,6 +12,7 @@ aws-gatling-tools is the aws stress-test tool used by [gatling](https://gatling.
     ```sh
     $ brew install sbt awscli jq
     ```
+- installing Docker for Mac
 - register an IAM user in AWS account
 - add a profile for the IAM user as `aws-gatling-tools` to `~/.aws/credentails`.
     ```sh
