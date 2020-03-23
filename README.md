@@ -66,7 +66,7 @@ $ sh ./run-stress-test.sh
 
 All control is performed by `Aggregate Runner`, so the terminal can be closed after execute the command.
 
-### chat log
+### chat log example
 
 ```
 Gatling Runner started:
@@ -85,3 +85,7 @@ Gatling Reporter started: task arns = https://ap-northeast-1.console.aws.amazon.
 runTaskReporterEnvironments = Map(AWS_REGION -> ap-northeast-1, GATLING_BUCKET_NAME -> j5ik2o-aws-gatling-tools-logs, GATLING_RESULT_DIR_PATH -> api-server/xxxxxxxxxxx-xxxxxxxxxxxx)
 Gatling Reporter finished: report url: https://j5ik2o-aws-gatling-tools-logs.s3.amazonaws.com/api-server/xxxxxxxxx-xxxxxxxxxxx/index.html
 ```
+
+### gatling report example
+
+<img src="https://raw.githubusercontent.com/j5ik2o/aws-gatling-tools/master/doc/gatling-report.png"/>
