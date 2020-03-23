@@ -54,7 +54,7 @@ $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt gatling-aggregate-runner/ecr:push
 
 ```sh
 $ cp run-stress-test.sh.default run-stress-test.sh
-$ vi run-stress-test.sh # edit
+$ vi run-stress-test.sh # edit stress-test conditions
 $ sh ./run-stress-test.sh
 ```
 
