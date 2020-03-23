@@ -55,10 +55,9 @@ $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt gatling-aggregate-runner/ecr:push
 ## How to run a stress-test
 
 ```sh
-$ AWS_PROFILE=aws-gatling-tools \
-    GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL=https://hooks.slack.com/services/xxxxx \
-    GATLING_TARGET_HOST=http://XXXXX.XXXXXX.XXXXX/hello \
-    sbt gatling-aggregate-runner/gatling::runTask
+$ cp run-stress-test.sh.default run-stress-test.sh
+$ vi run-stress-test.sh # edit
+$ sh ./run-stress-test.sh
 ```
 
 1. `Aggregate Runner` starts on the ECS cluster.
@@ -66,6 +65,8 @@ $ AWS_PROFILE=aws-gatling-tools \
 1. Wait for all `Runners` until finish.
 1. After all runners have finished, launch the `S3 Reporter`, `Aggregate Runner` notifies to chat
 1. `Aggregate Runner` notifies the url to gatling report on S3.
+
+All control is performed by `Aggregate Runner`, so the terminal can be closed after execute the command.
 
 ### chat log
 
