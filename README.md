@@ -1,7 +1,5 @@
 # aws-gatling-tools
 
-STATUS: WIP
-
 aws-gatling-tools is the aws stress-test tool used by [gatling](https://gatling.io/). This system can perform stress-tests using processes on Fargate, output the report to S3, and notify the report url to chats.
 
 <img src="https://raw.githubusercontent.com/j5ik2o/aws-gatling-tools/master/doc/system-layout.png"/>
