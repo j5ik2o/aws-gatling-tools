@@ -28,3 +28,4 @@ data/
 .DS_Store
 .credentials
 .gpgCredentials
+run-stress-test.sh
