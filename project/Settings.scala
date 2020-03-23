@@ -192,47 +192,67 @@ object Settings {
         .build()
       EcsAsyncClient(underlying)
     },
-    runTaskEcsCluster in gatling := "j5ik2o-aws-gatling-tools-ecs",
+    runTaskEcsCluster in gatling := sys.env
+      .getOrElse("GATLING_ECS_CLUSTER", "j5ik2o-aws-gatling-tools-ecs"),
     runTaskTaskDefinition in gatling := {
       getTaskDefinitionName(
-        (runTaskEcsClient in gatling).value,
-        (runTaskAwaitDuration in gatling).value,
-        "j5ik2o-aws-gatling-tools-gatling-aggregate-runner"
+        client = (runTaskEcsClient in gatling).value,
+        awaitDuration = (runTaskAwaitDuration in gatling).value,
+        prefix = "j5ik2o-aws-gatling-tools-gatling-aggregate-runner"
       )
     },
     runTaskAwaitDuration in gatling := Duration.Inf,
-    runTaskSubnets in gatling := Seq("subnet-00ef5bc53cf992ab4"), // 10.0.1.0/24 public
-    runTaskAssignPublicIp in gatling := AssignPublicIp.ENABLED,
-    runTaskEnvironments in gatling := Map(
-      "AWS_REGION" -> "ap-northeast-1",
-      "GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL" -> sys.env(
-        "GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL"
-      ),
-      "GATLING_ECS_CLUSTER_NAME" -> (runTaskEcsCluster in gatling).value,
-      "GATLING_SUBNET" -> (runTaskSubnets in gatling).value.head,
-      "GATLING_TASK_DEFINITION" -> {
-        getTaskDefinitionName(
-          (runTaskEcsClient in gatling).value,
-          (runTaskAwaitDuration in gatling).value,
-          "j5ik2o-aws-gatling-tools-gatling-runner"
-        )
-      },
-      "GATLING_COUNT" -> "10",
-      "GATLING_PAUSE_DURATION" -> "3s",
-      "GATLING_RAMP_DURATION" -> "200s",
-      "GATLING_HOLD_DURATION" -> "5m",
-      "GATLING_TARGET_ENDPOINT_BASE_URL" -> s"http://${sys.env("GATLING_TARGET_HOST")}:8080/hello",
-      "GATLING_SIMULATION_CLASS" -> "com.github.j5ik2o.gatling.BasicSimulation",
-      "GATLING_USERS" -> "10",
-      "GATLING_REPORTER_TASK_DEFINITION" -> {
-        getTaskDefinitionName(
-          (runTaskEcsClient in gatling).value,
-          (runTaskAwaitDuration in gatling).value,
-          "j5ik2o-aws-gatling-tools-gatling-s3-reporter"
-        )
-      },
-      "GATLING_BUCKET_NAME" -> "api-server-gatling-logs"
+    runTaskSubnets in gatling := Seq(
+      sys.env.getOrElse("GATLING_SUBNET_ID", "subnet-XXXXXXXXX")
     ),
+    runTaskAssignPublicIp in gatling := AssignPublicIp.ENABLED,
+    runTaskEnvironments in gatling := {
+      Map(
+        "AWS_REGION" -> sys.env("AWS_REGION"),
+        "GATLING_ECS_CLUSTER_NAME" -> (runTaskEcsCluster in gatling).value,
+        "GATLING_SUBNET" -> (runTaskSubnets in gatling).value.head,
+        "GATLING_TASK_DEFINITION" -> {
+          getTaskDefinitionName(
+            client = (runTaskEcsClient in gatling).value,
+            awaitDuration = (runTaskAwaitDuration in gatling).value,
+            prefix = "j5ik2o-aws-gatling-tools-gatling-runner"
+          )
+        },
+        "GATLING_COUNT" -> sys.env("GATLING_COUNT"),
+        "GATLING_PAUSE_DURATION" -> sys.env("GATLING_PAUSE_DURATION"),
+        "GATLING_RAMP_DURATION" -> sys.env("GATLING_RAMP_DURATION"),
+        "GATLING_HOLD_DURATION" -> sys.env("GATLING_HOLD_DURATION"),
+        "GATLING_TARGET_ENDPOINT_BASE_URL" -> sys.env(
+          "GATLING_TARGET_ENDPOINT_BASE_URL"
+        ),
+        "GATLING_SIMULATION_CLASS" -> sys.env("GATLING_SIMULATION_CLASS"),
+        "GATLING_USERS" -> sys.env("GATLING_USERS"),
+        "GATLING_REPORTER_TASK_DEFINITION" -> {
+          getTaskDefinitionName(
+            client = (runTaskEcsClient in gatling).value,
+            awaitDuration = (runTaskAwaitDuration in gatling).value,
+            prefix = "j5ik2o-aws-gatling-tools-gatling-s3-reporter"
+          )
+        },
+        "GATLING_BUCKET_NAME" -> sys.env("GATLING_BUCKET_NAME")
+      ) ++ sys.env
+        .get("GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL")
+        .map(v => Map("GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL" -> v))
+        .getOrElse(Map.empty) ++ {
+        sys.env
+          .get("GATLING_NOTICE_CHATWORK_HOST")
+          .map(v => Map("GATLING_NOTICE_CHATWORK_HOST" -> v))
+          .getOrElse(Map.empty) ++
+          sys.env
+            .get("GATLING_NOTICE_CHATWORK_ROOM_ID")
+            .map(v => Map("GATLING_NOTICE_CHATWORK_ROOM_ID" -> v))
+            .getOrElse(Map.empty) ++
+          sys.env
+            .get("GATLING_NOTICE_CHATWORK_TOKEN")
+            .map(v => Map("GATLING_NOTICE_CHATWORK_TOKEN" -> v))
+            .getOrElse(Map.empty)
+      }
+    },
     runTaskContainerOverrideName in gatling := "gatling-aggregate-runner",
     runTask in gatling := {
       implicit val log = streams.value.log

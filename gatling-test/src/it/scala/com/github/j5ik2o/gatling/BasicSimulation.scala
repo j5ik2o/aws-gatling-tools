@@ -27,8 +27,8 @@ class BasicSimulation extends Simulation {
     )
 
   val scn = scenario(getClass.getName)
-    .exec {
-      hello
+    .forever {
+      pause(pauseDuration).exec(hello)
     }
 
   setUp(scn.inject(rampUsers(numOfUser).during(rampDuration)))
@@ -37,7 +37,7 @@ class BasicSimulation extends Simulation {
 
   private def hello: HttpRequestBuilder = {
     http("hello")
-      .get("/hello")
+      .get(s"$endpoint/hello")
       .check(status.is(200))
   }
 
