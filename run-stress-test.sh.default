@@ -1,0 +1,19 @@
+#!/bin/sh
+
+export AWS_REGION=ap-northeast-1
+export AWS_PROFILE=aws-gatling-tools
+
+export GATLING_ECS_CLUSTER=j5ik2o-aws-gatling-tools-ecs
+export GATLING_SUBNET_ID=subnet-xxxxxxxxx
+export GATLING_BUCKET_NAME=j5ik2o-aws-gatling-tools-logs
+export GATLING_NOTICE_SLACK_INCOMING_WEBHOOK_URL=https://hooks.slack.com/services/xxxxx
+
+export GATLING_COUNT=10
+export GATLING_USERS=10
+export GATLING_PAUSE_DURATION=3s
+export GATLING_RAMP_DURATION=200s
+export GATLING_HOLD_DURATION=5m
+export GATLING_SIMULATION_CLASS="com.github.j5ik2o.gatling.BasicSimulation"
+export GATLING_TARGET_ENDPOINT_BASE_URL=http://xxxx.ap-northeast-1.elb.amazonaws.com
+
+sbt gatling-aggregate-runner/gatling::runTask
