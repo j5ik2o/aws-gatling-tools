@@ -39,6 +39,7 @@
 ```sh
 $ cd terraform
 terraform $ cp terraform.tfvars.default terraform.tfvars
+terrafrom $ vi terrafrom.tfvars # edit
 terraform $ terraform init
 terraform $ terraform plan
 terraform $ terraform apply
