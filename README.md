@@ -7,6 +7,8 @@
 
 ## project structure
 
+- terraform
+    - The terraform scripts for deploying a stress-test environment on AWS.
 - gatling-aggregate-runner
     - The application to manage stress testing.
 - gatling-runner
