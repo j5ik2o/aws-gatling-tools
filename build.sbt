@@ -9,7 +9,7 @@ import Settings._
 val `api-server` = (project in file("api-server"))
   .enablePlugins(AshScriptPlugin, JavaAgent, EcrPlugin)
   .settings(baseSettings)
-  .settings(dockerCommonSettings)
+  .settings(dockerBaseSettings)
   .settings(apiServerEcrSettings)
   .settings(
     name := "api-server",
@@ -56,7 +56,7 @@ val `api-server` = (project in file("api-server"))
 
 lazy val `gatling-test` = (project in file("gatling-test"))
   .enablePlugins(GatlingPlugin)
-  .settings(gatlingCommonSettings)
+  .settings(gatlingBaseSettings)
   .settings(
     name := "gatling-test",
     libraryDependencies ++= Seq(
@@ -76,7 +76,7 @@ lazy val `gatling-test` = (project in file("gatling-test"))
 
 lazy val `gatling-runner` = (project in file("gatling-runner"))
   .enablePlugins(JavaAppPackaging, EcrPlugin)
-  .settings(gatlingCommonSettings)
+  .settings(gatlingBaseSettings)
   .settings(gatlingRunnerEcrSettings)
   .settings(
     name := "gatling-runner",
@@ -107,7 +107,7 @@ lazy val `gatling-s3-reporter` = (project in file("gatling-s3-reporter"))
 lazy val `gatling-aggregate-runner` =
   (project in file("gatling-aggregate-runner"))
     .enablePlugins(JavaAppPackaging, EcrPlugin)
-    .settings(gatlingCommonSettings)
+    .settings(gatlingBaseSettings)
     .settings(gatlingAggregateRunnerEcrSettings)
     .settings(gatlingAggregateRunTaskSettings)
     .settings(

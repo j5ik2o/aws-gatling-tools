@@ -19,18 +19,18 @@ object Runner extends App {
 
   val config = ConfigFactory.load()
   val simulationClassName =
-    config.getString("api-server.gatling.simulation-classname")
+    config.getString("runner.gatling.simulation-classname")
   val executionId = config.getString("api-server.gatling.execution-id")
 
   val s3EndPoint = {
-    val endPoint = config.getString("api-server.gatling.aws-s3-endpoint")
+    val endPoint = config.getString("runner.gatling.aws-s3-endpoint")
     if (endPoint.isEmpty) None else Some(endPoint)
   }
-  val bucketName = config.getString("api-server.gatling.aws-s3-bucket-name")
+  val bucketName = config.getString("runner.gatling.aws-s3-bucket-name")
   val createBucketOnStart =
-    config.getBoolean("api-server.gatling.aws-s3-create-bucket-on-start")
+    config.getBoolean("runner.gatling.aws-s3-create-bucket-on-start")
   val pathStyleAccess =
-    config.getBoolean("api-server.gatling.aws-s3-path-style-access")
+    config.getBoolean("runner.gatling.aws-s3-path-style-access")
 
   val gatlingConfig = ConfigFactory.load("gatling.conf")
   val gatlingDir = gatlingConfig.getString("gatling.core.directory.results")
