@@ -4,7 +4,7 @@ aws-gatling-tools is the aws stress-test tool used by [gatling](https://gatling.
 
 <img src="https://raw.githubusercontent.com/j5ik2o/aws-gatling-tools/master/doc/system-layout.png"/>
 
-## How to prepare
+## preparing
 
 - installing tool
     ```sh
@@ -20,7 +20,7 @@ aws-gatling-tools is the aws stress-test tool used by [gatling](https://gatling.
     region = ap-northeast-1 
     ```
 
-## How to build the AWS environment
+## build the AWS environment
 
 ```sh
 $ cd terraform
@@ -30,14 +30,14 @@ terraform $ terraform plan
 terraform $ terraform apply
 ```
 
-## How to build the test application
+## build the test application(if necessary)
 
 ```sh
 # api-server docker build & push
 $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt api-server/ecr:push
 ```
 
-## How to build the stress-test tools
+## build the stress-test tools
 
 ```sh
 # gatling-runner docker build & push
@@ -50,7 +50,7 @@ $ cd gatling-s3-reporter && make release && cd ..
 $ AWS_DEFAULT_PROFILE=aws-gatling-tools sbt gatling-aggregate-runner/ecr:push
 ```
 
-## How to run a stress-test
+## run a stress-test
 
 ```sh
 $ cp run-stress-test.sh.default run-stress-test.sh
