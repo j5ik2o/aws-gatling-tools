@@ -4,6 +4,18 @@
 
 <img src="https://raw.githubusercontent.com/j5ik2o/aws-gatling-tools/master/doc/system-layout.png"/>
 
+
+## project structure
+
+- gatling-aggregate-runner
+    - The application to manage stress testing.
+- gatling-runner
+    - The application that performs stress tests.
+- gatling-s3-reporter(not sbt project)
+    - The application that aggregates logs and outputs a report to S3.
+- api-server(for test)
+    - The server application for testing.
+
 ## preparation
 
 - installing tool
@@ -48,6 +60,8 @@ module "ecr_api_server" {
 
 
 ## build the test application(if necessary)
+
+This is just to check the operation.It is not necessary if you use your own test application. 
 
 ```sh
 # api-server docker build & push
