@@ -49,7 +49,7 @@ module "vpc" {
   }
 }
 
-# for test application
+# for test application, if necessary
 module "ecr_api_server" {
   source   = "./api-server"
   prefix   = var.prefix
