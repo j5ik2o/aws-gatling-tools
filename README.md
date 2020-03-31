@@ -22,7 +22,7 @@
 
 - installing tool
     ```sh
-    $ brew install sbt awscli jq
+    $ brew install sbt awscli jq terraform
     ```
 - installing Docker for Mac
 - register an IAM user in AWS account
