@@ -20,7 +20,7 @@ object Runner extends App {
   val config = ConfigFactory.load()
   val simulationClassName =
     config.getString("runner.gatling.simulation-classname")
-  val executionId = config.getString("api-server.gatling.execution-id")
+  val executionId = config.getString("runner.gatling.execution-id")
 
   val s3EndPoint = {
     val endPoint = config.getString("runner.gatling.aws-s3-endpoint")
