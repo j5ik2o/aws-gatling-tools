@@ -11,14 +11,14 @@ import scala.concurrent.duration._
 class BasicSimulation extends Simulation {
   private val config = ConfigFactory.load()
   private val endpoint =
-    config.getString("api-server.gatling.target-endpoint-base-url")
+    config.getString("runner.gatling.target-endpoint-base-url")
   private val pauseDuration =
-    config.getDuration("api-server.gatling.pause-duration").toMillis.millis
-  private val numOfUser = config.getInt("api-server.gatling.users")
+    config.getDuration("runner.gatling.pause-duration").toMillis.millis
+  private val numOfUser = config.getInt("runner.gatling.users")
   private val rampDuration =
-    config.getDuration("api-server.gatling.ramp-duration").toMillis.millis
+    config.getDuration("runner.gatling.ramp-duration").toMillis.millis
   private val holdDuration =
-    config.getDuration("api-server.gatling.hold-duration").toMillis.millis
+    config.getDuration("runner.gatling.hold-duration").toMillis.millis
   private val entireDuration = rampDuration + holdDuration
 
   private val httpConf: HttpProtocolBuilder =
