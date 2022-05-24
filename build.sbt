@@ -35,10 +35,10 @@ val `api-server` = (project in file("api-server"))
       "-Dcom.sun.management.jmxremote.authenticate=false"
     ),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %% "akka-http" % "10.1.11",
-      "com.typesafe.akka" %% "akka-stream" % akka26Version,
-      "com.typesafe.akka" %% "akka-slf4j" % akka26Version,
-      "com.github.scopt" %% "scopt" % "4.0.1",
+      "com.typesafe.akka"   %% "akka-http"                % "10.1.11",
+      "com.typesafe.akka"   %% "akka-stream"              % akka26Version,
+      "com.typesafe.akka"   %% "akka-slf4j"               % akka26Version,
+      "com.github.scopt"    %% "scopt"                    % "4.0.1",
       "net.logstash.logback" % "logstash-logback-encoder" % "4.11" excludeAll (
         ExclusionRule(
           organization = "com.fasterxml.jackson.core",
@@ -120,12 +120,12 @@ lazy val `gatling-aggregate-runner` =
       Docker / packageName := "gatling-aggregate-runner",
       dockerUpdateLatest := true,
       libraryDependencies ++= Seq(
-        "org.slf4j" % "slf4j-api" % "1.7.36",
-        "ch.qos.logback" % "logback-classic" % "1.2.11",
-        "org.codehaus.janino" % "janino" % "3.0.6",
-        "com.iheart" %% "ficus" % "1.4.6",
-        "com.github.j5ik2o" %% "reactive-aws-ecs-core" % "1.1.3",
-        "org.scalaj" %% "scalaj-http" % "2.4.2"
+        "org.slf4j"           % "slf4j-api"             % "1.7.36",
+        "ch.qos.logback"      % "logback-classic"       % "1.2.11",
+        "org.codehaus.janino" % "janino"                % "3.0.6",
+        "com.iheart"         %% "ficus"                 % "1.4.6",
+        "com.github.j5ik2o"  %% "reactive-aws-ecs-core" % "1.1.3",
+        "org.scalaj"         %% "scalaj-http"           % "2.4.2"
       )
     )
 
