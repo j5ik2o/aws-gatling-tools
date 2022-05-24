@@ -120,7 +120,7 @@ lazy val `gatling-aggregate-runner` =
       packageName in Docker := "gatling-aggregate-runner",
       dockerUpdateLatest := true,
       libraryDependencies ++= Seq(
-        "org.slf4j" % "slf4j-api" % "1.7.26",
+        "org.slf4j" % "slf4j-api" % "1.7.36",
         "ch.qos.logback" % "logback-classic" % "1.2.11",
         "org.codehaus.janino" % "janino" % "3.0.6",
         "com.iheart" %% "ficus" % "1.4.6",
