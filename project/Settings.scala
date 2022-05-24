@@ -72,7 +72,7 @@ object Settings {
   lazy val gatlingBaseSettings = Seq(
     organization := "com.github.j5ik2o",
     version := "1.0.0-SNAPSHOT",
-    scalaVersion := "2.12.13",
+    scalaVersion := "2.13.8",
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
