@@ -49,7 +49,10 @@ object Settings {
       },
       scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
       semanticdbEnabled := true,
-      semanticdbVersion := scalafixSemanticdb.revision
+      semanticdbVersion := scalafixSemanticdb.revision,
+      envVars := Map(
+        "AWS_REGION" -> "ap-northeast-1"
+      )
     )
 
   lazy val dockerBaseSettings = Seq(
