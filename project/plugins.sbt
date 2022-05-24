@@ -1,5 +1,5 @@
 libraryDependencies ++= Seq(
-  "com.github.j5ik2o" %% "reactive-aws-ecs-core" % "1.1.3"
+  "com.github.j5ik2o" %% "reactive-aws-ecs-core" % "1.2.6"
 )
 addSbtPlugin("io.gatling" % "gatling-sbt" % "3.1.0")
 
