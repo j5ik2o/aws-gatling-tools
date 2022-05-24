@@ -35,7 +35,7 @@ val `api-server` = (project in file("api-server"))
       "-Dcom.sun.management.jmxremote.authenticate=false"
     ),
     libraryDependencies ++= Seq(
-      "com.typesafe.akka"   %% "akka-http"                % "10.1.11",
+      "com.typesafe.akka"   %% "akka-http"                % "10.2.9",
       "com.typesafe.akka"   %% "akka-stream"              % akka26Version,
       "com.typesafe.akka"   %% "akka-slf4j"               % akka26Version,
       "com.github.scopt"    %% "scopt"                    % "4.0.1",
