@@ -1,0 +1,85 @@
+name: CI
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.scala'
+      - '**.java'
+      - '**.sbt'
+      - '.scalafmt.conf'
+      - 'project/build.properties'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.scala'
+      - '**.java'
+      - '**.sbt'
+      - '.scalafmt.conf'
+      - 'project/build.properties'
+      - '.github/workflows/ci.yml'
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+      JVM_OPTS:  -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: olafurpg/setup-scala@v13
+        with:
+          java-version: "adopt@1.8"
+      - uses: coursier/cache-action@v6
+      - run: sbt -v lint
+      - name: clean up
+        run: "${GITHUB_WORKSPACE}/.github/clean-up.sh"
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk: [ adopt@1.8, adopt@1.11, adopt@1.14 ]
+        scala: [ 2.13.5, 2.12.10 ]
+    runs-on: ubuntu-latest
+    needs: lint
+    env:
+      JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+      JVM_OPTS:  -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+      AWS_REGION: ap-northeast-1
+      TEST_TIME_FACTOR: 3
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: olafurpg/setup-scala@v13
+        with:
+          java-version: ${{ matrix.jdk }}
+      - uses: coursier/cache-action@v6
+      - name: sbt test
+        run: sbt -v ++${{ matrix.scala }} test
+      - name: clean up
+        run: "${GITHUB_WORKSPACE}/.github/clean-up.sh"
+  automerge:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.actor == 'j5ik2o-bot[bot]'
+    needs: test
+    steps:
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: 111016
+          private_key: ${{ secrets.BOT_PRIVATE_KEY }}
+      - name: automerge
+        uses: pascalgn/automerge-action@v0.14.3
+        env:
+          GITHUB_TOKEN: "${{ steps.generate_token.outputs.token }}"
+          MERGE_LABELS: ""
+          MERGE_METHOD: "rebase"
+          MERGE_FILTER_AUTHOR: "j5ik2o-bot[bot]"
