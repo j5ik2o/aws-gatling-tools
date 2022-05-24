@@ -49,7 +49,7 @@ val `api-server` = (project in file("api-server"))
           name = "jackson-databind"
         )
       ),
-      "org.slf4j" % "jul-to-slf4j" % "1.7.26",
+      "org.slf4j" % "jul-to-slf4j" % "1.7.36",
       "ch.qos.logback" % "logback-classic" % "1.2.11"
     )
   )
