@@ -13,23 +13,23 @@ val `api-server` = (project in file("api-server"))
   .settings(apiServerEcrSettings)
   .settings(
     name := "api-server",
-    mainClass in (Compile, run) := Some("example.api.server.ApiServer"),
-    mainClass in reStart := Some("example.api.server.ApiServer"),
+    Compile / run / mainClass := Some("example.api.server.ApiServer"),
+    reStart / mainClass := Some("example.api.server.ApiServer"),
     dockerEntrypoint := Seq("/opt/docker/bin/api-server"),
     dockerUsername := Some("j5ik2o"),
     dockerExposedPorts ++= Seq(8080),
-    fork in run := true,
-    javaAgents += "org.aspectj" % "aspectjweaver" % "1.8.13",
+    run / fork := true,
+    javaAgents += "org.aspectj"            % "aspectjweaver"    % "1.8.13",
     javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "runtime;test",
-    javaOptions in Universal += "-Dorg.aspectj.tracing.factory=default",
-    javaOptions in run ++= Seq(
+    Universal / javaOptions += "-Dorg.aspectj.tracing.factory=default",
+    run / javaOptions ++= Seq(
       s"-Dcom.sun.management.jmxremote.port=${sys.env.getOrElse("JMX_PORT", "8999")}",
       "-Dcom.sun.management.jmxremote.authenticate=false",
       "-Dcom.sun.management.jmxremote.ssl=false",
       "-Dcom.sun.management.jmxremote.local.only=false",
       "-Dcom.sun.management.jmxremote"
     ),
-    javaOptions in Universal ++= Seq(
+    Universal / javaOptions ++= Seq(
       "-Dcom.sun.management.jmxremote",
       "-Dcom.sun.management.jmxremote.local.only=true",
       "-Dcom.sun.management.jmxremote.authenticate=false"
@@ -49,7 +49,7 @@ val `api-server` = (project in file("api-server"))
           name = "jackson-databind"
         )
       ),
-      "org.slf4j" % "jul-to-slf4j" % "1.7.26",
+      "org.slf4j"      % "jul-to-slf4j"    % "1.7.26",
       "ch.qos.logback" % "logback-classic" % "1.2.11"
     )
   )
@@ -61,17 +61,17 @@ lazy val `gatling-test` = (project in file("gatling-test"))
     name := "gatling-test",
     libraryDependencies ++= Seq(
       "io.gatling.highcharts" % "gatling-charts-highcharts" % gatlingVersion,
-      "io.gatling" % "gatling-test-framework" % gatlingVersion,
-      "com.amazonaws" % "aws-java-sdk-core" % awsSdkVersion,
-      "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion,
-      "io.circe" %% "circe-core" % circeVersion,
-      "io.circe" %% "circe-generic" % circeVersion,
-      "io.circe" %% "circe-parser" % circeVersion
+      "io.gatling"            % "gatling-test-framework"    % gatlingVersion,
+      "com.amazonaws"         % "aws-java-sdk-core"         % awsSdkVersion,
+      "com.amazonaws"         % "aws-java-sdk-s3"           % awsSdkVersion,
+      "io.circe"             %% "circe-core"                % circeVersion,
+      "io.circe"             %% "circe-generic"             % circeVersion,
+      "io.circe"             %% "circe-parser"              % circeVersion
     ),
-    publishArtifact in (GatlingIt, packageBin) := true
+    GatlingIt / packageBin / publishArtifact := true
   )
   .settings(
-    addArtifact(artifact in (GatlingIt, packageBin), packageBin in GatlingIt)
+    addArtifact(GatlingIt / packageBin / artifact, GatlingIt / packageBin)
   )
 
 lazy val `gatling-runner` = (project in file("gatling-runner"))
@@ -81,16 +81,16 @@ lazy val `gatling-runner` = (project in file("gatling-runner"))
   .settings(
     name := "gatling-runner",
     libraryDependencies ++= Seq(
-      "io.gatling" % "gatling-app" % gatlingVersion,
+      "io.gatling"    % "gatling-app"       % gatlingVersion,
       "com.amazonaws" % "aws-java-sdk-core" % awsSdkVersion,
-      "com.amazonaws" % "aws-java-sdk-s3" % awsSdkVersion
+      "com.amazonaws" % "aws-java-sdk-s3"   % awsSdkVersion
     ),
-    mainClass in (Compile, bashScriptDefines) := Some(
+    Compile / bashScriptDefines / mainClass := Some(
       "com.github.j5ik2o.gatling.runner.Runner"
     ),
     dockerBaseImage := "openjdk:8",
     dockerUsername := Some("j5ik2o"),
-    packageName in Docker := "gatling-runner",
+    Docker / packageName := "gatling-runner",
     dockerUpdateLatest := true,
     dockerCommands ++= Seq(
       Cmd("USER", "root"),
@@ -112,12 +112,12 @@ lazy val `gatling-aggregate-runner` =
     .settings(gatlingAggregateRunTaskSettings)
     .settings(
       name := "gatling-aggregate-runner",
-      mainClass in (Compile, bashScriptDefines) := Some(
+      Compile / bashScriptDefines / mainClass := Some(
         "com.github.j5ik2o.gatling.runner.Runner"
       ),
       dockerBaseImage := "openjdk:8",
       dockerUsername := Some("j5ik2o"),
-      packageName in Docker := "gatling-aggregate-runner",
+      Docker / packageName := "gatling-aggregate-runner",
       dockerUpdateLatest := true,
       libraryDependencies ++= Seq(
         "org.slf4j" % "slf4j-api" % "1.7.36",
@@ -140,3 +140,7 @@ val `aws-gatling-tools` =
       `gatling-s3-reporter`,
       `gatling-aggregate-runner`
     )
+
+// --- Custom commands
+addCommandAlias("lint", ";scalafmtCheck;test:scalafmtCheck;scalafmtSbtCheck;scalafixAll --check")
+addCommandAlias("fmt", ";scalafmtAll;scalafmtSbt;scalafix RemoveUnused")

@@ -4,18 +4,18 @@ import com.github.j5ik2o.reactive.aws.ecs.EcsAsyncClient
 import software.amazon.awssdk.services.ecs.model._
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 object EcsTaskUtil {
   def runTask(
-    runTaskEcsClient: EcsAsyncClient,
-    runTaskEcsClusterName: String,
-    runTaskTaskDefinition: String,
-    runTaskCount: Int,
-    runTaskSubnets: Seq[String],
-    runTaskAssignPublicIp: AssignPublicIp,
-    runTaskContainerOverrideName: String,
-    runTaskEnvironments: Map[String, String]
+      runTaskEcsClient: EcsAsyncClient,
+      runTaskEcsClusterName: String,
+      runTaskTaskDefinition: String,
+      runTaskCount: Int,
+      runTaskSubnets: Seq[String],
+      runTaskAssignPublicIp: AssignPublicIp,
+      runTaskContainerOverrideName: String,
+      runTaskEnvironments: Map[String, String]
   )(implicit ec: ExecutionContext): Future[Seq[Task]] = {
     val runTaskRequest = RunTaskRequest
       .builder()
@@ -44,9 +44,8 @@ object EcsTaskUtil {
               .name(runTaskContainerOverrideName)
               .environment(
                 runTaskEnvironments
-                  .map {
-                    case (k, v) =>
-                      KeyValuePair.builder().name(k).value(v).build()
+                  .map { case (k, v) =>
+                    KeyValuePair.builder().name(k).value(v).build()
                   }
                   .toSeq
                   .asJava

@@ -10,3 +10,7 @@ addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.4")
 addSbtPlugin("com.mintbeans" % "sbt-ecr" % "0.15.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
+
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
+
+addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.9.30")

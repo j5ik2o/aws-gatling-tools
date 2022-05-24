@@ -1,40 +1,27 @@
-import com.amazonaws.regions.{Region, Regions}
+import com.amazonaws.regions.{ Region, Regions }
 import com.github.j5ik2o.reactive.aws.ecs.EcsAsyncClient
 import com.github.j5ik2o.reactive.aws.ecs.implicits._
-import com.typesafe.sbt.SbtNativePackager.autoImport.{maintainer, packageName}
+import com.typesafe.sbt.SbtNativePackager.autoImport.{ maintainer, packageName }
 import com.typesafe.sbt.packager.archetypes.scripts.BashStartScriptPlugin.autoImport.bashScriptExtraDefines
-import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.{
-  dockerBaseImage,
-  dockerUpdateLatest,
-  _
-}
+import com.typesafe.sbt.packager.docker.DockerPlugin.autoImport.{ dockerBaseImage, dockerUpdateLatest, _ }
 import sbt.Keys._
 import sbt.internal.util.ManagedLogger
-import sbt.{CrossVersion, Resolver, settingKey, taskKey, _}
-import sbtecr.EcrPlugin.autoImport.{
-  localDockerImage,
-  login,
-  push,
-  region,
-  repositoryName,
-  repositoryTags,
-  _
-}
-import software.amazon.awssdk.services.ecs.model.{AssignPublicIp, Task, _}
-import software.amazon.awssdk.services.ecs.{
-  EcsAsyncClient => JavaEcsAsyncClient
-}
+import sbt.{ settingKey, taskKey, CrossVersion, Resolver, _ }
+import sbtecr.EcrPlugin.autoImport.{ localDockerImage, login, push, region, repositoryName, repositoryTags, _ }
+import scalafix.sbt.ScalafixPlugin.autoImport.{ scalafixScalaBinaryVersion, scalafixSemanticdb }
+import software.amazon.awssdk.services.ecs.model.{ AssignPublicIp, Task, _ }
+import software.amazon.awssdk.services.ecs.{ EcsAsyncClient => JavaEcsAsyncClient }
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 
 object Settings {
   val gatlingVersion = "3.1.0"
-  val circeVersion = "0.11.1"
-  val awsSdkVersion = "1.11.575"
-  val akka26Version = "2.6.4"
+  val circeVersion   = "0.11.1"
+  val awsSdkVersion  = "1.11.575"
+  val akka26Version  = "2.6.4"
 
   val baseSettings =
     Seq(
@@ -48,7 +35,9 @@ object Settings {
           "-encoding",
           "UTF-8",
           "-language:_",
-          "-target:jvm-1.8"
+          "-target:jvm-1.8",
+          "-Ywarn-unused",
+          "-Xlint:unused"
         ) ++ {
           CrossVersion.partialVersion(scalaVersion.value) match {
             case Some((2L, scalaMajor)) if scalaMajor >= 12 =>
@@ -57,12 +46,15 @@ object Settings {
               Seq("-Yinline-warnings")
           }
         }
-      }
+      },
+      scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+      semanticdbEnabled := true,
+      semanticdbVersion := scalafixSemanticdb.revision
     )
 
   lazy val dockerBaseSettings = Seq(
     dockerBaseImage := "adoptopenjdk/openjdk8:x86_64-alpine-jdk8u191-b12",
-    maintainer in Docker := "Junichi Kato <j5ik2o@gmail.com>",
+    Docker / maintainer := "Junichi Kato <j5ik2o@gmail.com>",
     dockerUpdateLatest := true,
     bashScriptExtraDefines ++= Seq(
       "addJava -Xms${JVM_HEAP_MIN:-1024m}",
@@ -77,7 +69,7 @@ object Settings {
   lazy val gatlingBaseSettings = Seq(
     organization := "com.github.j5ik2o",
     version := "1.0.0-SNAPSHOT",
-    scalaVersion := "2.12.8",
+    scalaVersion := "2.12.13",
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
@@ -101,41 +93,45 @@ object Settings {
       // Warn when numerics are widened.
       "-Ywarn-numeric-widen",
       // Warn when imports are unused.
-      "-Ywarn-unused-import",
-      "-Ywarn-numeric-widen"
-    )
+      // "-Ywarn-unused-import",
+      "-Ywarn-numeric-widen",
+      "-Ywarn-unused"
+    ),
+    scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision
   )
 
   val apiServerEcrSettings = Seq(
-    region in Ecr := Region.getRegion(Regions.AP_NORTHEAST_1),
-    repositoryName in Ecr := "j5ik2o-aws-gatling-tools/api-server",
-    repositoryTags in Ecr ++= Seq(version.value),
-    localDockerImage in Ecr := "j5ik2o/" + (packageName in Docker).value + ":" + (version in Docker).value,
-    push in Ecr := ((push in Ecr) dependsOn (publishLocal in Docker, login in Ecr)).value
+    Ecr / region := Region.getRegion(Regions.AP_NORTHEAST_1),
+    Ecr / repositoryName := "j5ik2o-aws-gatling-tools/api-server",
+    Ecr / repositoryTags ++= Seq(version.value),
+    Ecr / localDockerImage := "j5ik2o/" + (Docker / packageName).value + ":" + (Docker / version).value,
+    Ecr / push := ((Ecr / push) dependsOn (Docker / publishLocal, Ecr / login)).value
   )
 
   lazy val gatlingRunnerEcrSettings = Seq(
-    region in Ecr := Region.getRegion(Regions.AP_NORTHEAST_1),
-    repositoryName in Ecr := "j5ik2o-aws-gatling-tools/gatling-runner",
-    localDockerImage in Ecr := "j5ik2o/" + (packageName in Docker).value + ":" + (version in Docker).value,
-    push in Ecr := ((push in Ecr) dependsOn (publishLocal in Docker, login in Ecr)).value
+    Ecr / region := Region.getRegion(Regions.AP_NORTHEAST_1),
+    Ecr / repositoryName := "j5ik2o-aws-gatling-tools/gatling-runner",
+    Ecr / localDockerImage := "j5ik2o/" + (Docker / packageName).value + ":" + (Docker / version).value,
+    Ecr / push := ((Ecr / push) dependsOn (Docker / publishLocal, Ecr / login)).value
   )
 
   lazy val gatlingAggregateRunnerEcrSettings = Seq(
-    region in Ecr := Region.getRegion(Regions.AP_NORTHEAST_1),
-    repositoryName in Ecr := "j5ik2o-aws-gatling-tools/gatling-aggregate-runner",
-    localDockerImage in Ecr := "j5ik2o/" + (packageName in Docker).value + ":" + (version in Docker).value,
-    push in Ecr := ((push in Ecr) dependsOn (publishLocal in Docker, login in Ecr)).value
+    Ecr / region := Region.getRegion(Regions.AP_NORTHEAST_1),
+    Ecr / repositoryName := "j5ik2o-aws-gatling-tools/gatling-aggregate-runner",
+    Ecr / localDockerImage := "j5ik2o/" + (Docker / packageName).value + ":" + (Docker / version).value,
+    Ecr / push := ((Ecr / push) dependsOn (Docker / publishLocal, Ecr / login)).value
   )
 
   val gatling = taskKey[Unit]("gatling")
   val runTask = taskKey[Seq[Task]]("run-task")
 
-  val runTaskEcsClient = settingKey[EcsAsyncClient]("run-task-ecs-client")
-  val runTaskAwaitDuration = settingKey[Duration]("run-task-await-duration")
-  val runTaskEcsCluster = settingKey[String]("run-task-ecs-cluster")
+  val runTaskEcsClient      = settingKey[EcsAsyncClient]("run-task-ecs-client")
+  val runTaskAwaitDuration  = settingKey[Duration]("run-task-await-duration")
+  val runTaskEcsCluster     = settingKey[String]("run-task-ecs-cluster")
   val runTaskTaskDefinition = taskKey[String]("run-task-task-definition")
-  val runTaskSubnets = settingKey[Seq[String]]("run-task-subnets")
+  val runTaskSubnets        = settingKey[Seq[String]]("run-task-subnets")
   val runTaskAssignPublicIp =
     settingKey[AssignPublicIp]("run-task-assign-public-ip")
   val runTaskEnvironments =
@@ -143,9 +139,7 @@ object Settings {
   val runTaskContainerOverrideName =
     settingKey[String]("run-task-container-override-name")
 
-  def getTaskDefinitionName(client: EcsAsyncClient,
-                            awaitDuration: Duration,
-                            prefix: String): String = {
+  def getTaskDefinitionName(client: EcsAsyncClient, awaitDuration: Duration, prefix: String): String = {
     def loop(request: ListTaskDefinitionsRequest): Future[String] = {
       client.listTaskDefinitions(request).flatMap { result =>
         if (result.sdkHttpResponse().isSuccessful) {
@@ -177,51 +171,51 @@ object Settings {
     Await.result(loop(req), awaitDuration)
   }
   val gatlingAggregateRunTaskSettings = Seq(
-    runTaskEcsClient in gatling := {
+    gatling / runTaskEcsClient := {
       val underlying = JavaEcsAsyncClient
         .builder()
         .build()
       EcsAsyncClient(underlying)
     },
-    runTaskEcsCluster in gatling := sys.env
+    gatling / runTaskEcsCluster := sys.env
       .getOrElse("GATLING_ECS_CLUSTER", "j5ik2o-aws-gatling-tools-ecs"),
-    runTaskTaskDefinition in gatling := {
+    gatling / runTaskTaskDefinition := {
       getTaskDefinitionName(
-        client = (runTaskEcsClient in gatling).value,
-        awaitDuration = (runTaskAwaitDuration in gatling).value,
+        client = (gatling / runTaskEcsClient).value,
+        awaitDuration = (gatling / runTaskAwaitDuration).value,
         prefix = "j5ik2o-aws-gatling-tools-gatling-aggregate-runner"
       )
     },
-    runTaskAwaitDuration in gatling := Duration.Inf,
-    runTaskSubnets in gatling := Seq(
+    gatling / runTaskAwaitDuration := Duration.Inf,
+    gatling / runTaskSubnets := Seq(
       sys.env.getOrElse("GATLING_SUBNET_ID", "subnet-XXXXXXXXX")
     ),
-    runTaskAssignPublicIp in gatling := AssignPublicIp.ENABLED,
-    runTaskEnvironments in gatling := {
+    gatling / runTaskAssignPublicIp := AssignPublicIp.ENABLED,
+    gatling / runTaskEnvironments := {
       Map(
-        "AWS_REGION" -> sys.env("AWS_REGION"),
-        "GATLING_ECS_CLUSTER_NAME" -> (runTaskEcsCluster in gatling).value,
-        "GATLING_SUBNET" -> (runTaskSubnets in gatling).value.head,
+        "AWS_REGION"               -> sys.env("AWS_REGION"),
+        "GATLING_ECS_CLUSTER_NAME" -> (gatling / runTaskEcsCluster).value,
+        "GATLING_SUBNET"           -> (gatling / runTaskSubnets).value.head,
         "GATLING_TASK_DEFINITION" -> {
           getTaskDefinitionName(
-            client = (runTaskEcsClient in gatling).value,
-            awaitDuration = (runTaskAwaitDuration in gatling).value,
+            client = (gatling / runTaskEcsClient).value,
+            awaitDuration = (gatling / runTaskAwaitDuration).value,
             prefix = "j5ik2o-aws-gatling-tools-gatling-runner"
           )
         },
-        "GATLING_COUNT" -> sys.env("GATLING_COUNT"),
+        "GATLING_COUNT"          -> sys.env("GATLING_COUNT"),
         "GATLING_PAUSE_DURATION" -> sys.env("GATLING_PAUSE_DURATION"),
-        "GATLING_RAMP_DURATION" -> sys.env("GATLING_RAMP_DURATION"),
-        "GATLING_HOLD_DURATION" -> sys.env("GATLING_HOLD_DURATION"),
+        "GATLING_RAMP_DURATION"  -> sys.env("GATLING_RAMP_DURATION"),
+        "GATLING_HOLD_DURATION"  -> sys.env("GATLING_HOLD_DURATION"),
         "GATLING_TARGET_ENDPOINT_BASE_URL" -> sys.env(
           "GATLING_TARGET_ENDPOINT_BASE_URL"
         ),
         "GATLING_SIMULATION_CLASS" -> sys.env("GATLING_SIMULATION_CLASS"),
-        "GATLING_USERS" -> sys.env("GATLING_USERS"),
+        "GATLING_USERS"            -> sys.env("GATLING_USERS"),
         "GATLING_REPORTER_TASK_DEFINITION" -> {
           getTaskDefinitionName(
-            client = (runTaskEcsClient in gatling).value,
-            awaitDuration = (runTaskAwaitDuration in gatling).value,
+            client = (gatling / runTaskEcsClient).value,
+            awaitDuration = (gatling / runTaskAwaitDuration).value,
             prefix = "j5ik2o-aws-gatling-tools-gatling-s3-reporter"
           )
         },
@@ -234,27 +228,27 @@ object Settings {
           .get("GATLING_NOTICE_CHATWORK_HOST")
           .map(v => Map("GATLING_NOTICE_CHATWORK_HOST" -> v))
           .getOrElse(Map.empty) ++
-          sys.env
-            .get("GATLING_NOTICE_CHATWORK_ROOM_ID")
-            .map(v => Map("GATLING_NOTICE_CHATWORK_ROOM_ID" -> v))
-            .getOrElse(Map.empty) ++
-          sys.env
-            .get("GATLING_NOTICE_CHATWORK_TOKEN")
-            .map(v => Map("GATLING_NOTICE_CHATWORK_TOKEN" -> v))
-            .getOrElse(Map.empty)
+        sys.env
+          .get("GATLING_NOTICE_CHATWORK_ROOM_ID")
+          .map(v => Map("GATLING_NOTICE_CHATWORK_ROOM_ID" -> v))
+          .getOrElse(Map.empty) ++
+        sys.env
+          .get("GATLING_NOTICE_CHATWORK_TOKEN")
+          .map(v => Map("GATLING_NOTICE_CHATWORK_TOKEN" -> v))
+          .getOrElse(Map.empty)
       }
     },
-    runTaskContainerOverrideName in gatling := "gatling-aggregate-runner",
-    runTask in gatling := {
-      implicit val log = streams.value.log
-      val _runTaskEcsClient = (runTaskEcsClient in gatling).value
-      val _runTaskEcsCluster = (runTaskEcsCluster in gatling).value
-      val _runTaskTaskDefinition = (runTaskTaskDefinition in gatling).value
-      val _runTaskSubnets = (runTaskSubnets in gatling).value
-      val _runTaskAssignPublicIp = (runTaskAssignPublicIp in gatling).value
+    gatling / runTaskContainerOverrideName := "gatling-aggregate-runner",
+    gatling / runTask := {
+      implicit val log           = streams.value.log
+      val _runTaskEcsClient      = (gatling / runTaskEcsClient).value
+      val _runTaskEcsCluster     = (gatling / runTaskEcsCluster).value
+      val _runTaskTaskDefinition = (gatling / runTaskTaskDefinition).value
+      val _runTaskSubnets        = (gatling / runTaskSubnets).value
+      val _runTaskAssignPublicIp = (gatling / runTaskAssignPublicIp).value
       val _runTaskContainerOverrideName =
-        (runTaskContainerOverrideName in gatling).value
-      val _runTaskEnvironments = (runTaskEnvironments in gatling).value
+        (gatling / runTaskContainerOverrideName).value
+      val _runTaskEnvironments = (gatling / runTaskEnvironments).value
       log.info("start runGatlingTask")
       val future = runGatlingTask(
         _runTaskEcsClient,
@@ -266,7 +260,7 @@ object Settings {
         _runTaskContainerOverrideName,
         _runTaskEnvironments
       )
-      val result = Await.result(future, (runTaskAwaitDuration in gatling).value)
+      val result = Await.result(future, (gatling / runTaskAwaitDuration).value)
       result.foreach { task: Task =>
         log.info(s"task.arn = ${task.taskArn()}")
       }
@@ -276,14 +270,14 @@ object Settings {
   )
 
   def runGatlingTask(
-    runTaskEcsClient: EcsAsyncClient,
-    runTaskEcsCluster: String,
-    runTaskTaskDefinition: String,
-    runTaskCount: Int,
-    runTaskSubnets: Seq[String],
-    runTaskAssignPublicIp: AssignPublicIp,
-    runTaskContainerOverrideName: String,
-    runTaskEnvironments: Map[String, String]
+      runTaskEcsClient: EcsAsyncClient,
+      runTaskEcsCluster: String,
+      runTaskTaskDefinition: String,
+      runTaskCount: Int,
+      runTaskSubnets: Seq[String],
+      runTaskAssignPublicIp: AssignPublicIp,
+      runTaskContainerOverrideName: String,
+      runTaskEnvironments: Map[String, String]
   )(implicit log: ManagedLogger): Future[Seq[Task]] = {
     val runTaskRequest = RunTaskRequest
       .builder()
@@ -312,9 +306,8 @@ object Settings {
               .name(runTaskContainerOverrideName)
               .environment(
                 runTaskEnvironments
-                  .map {
-                    case (k, v) =>
-                      KeyValuePair.builder().name(k).value(v).build()
+                  .map { case (k, v) =>
+                    KeyValuePair.builder().name(k).value(v).build()
                   }
                   .toSeq
                   .asJava
