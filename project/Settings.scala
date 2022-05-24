@@ -26,7 +26,7 @@ object Settings {
   val baseSettings =
     Seq(
       version := "1.0.0",
-      scalaVersion := "2.13.1",
+      scalaVersion := "2.13.8",
       scalacOptions ++= {
         Seq(
           "-feature",
