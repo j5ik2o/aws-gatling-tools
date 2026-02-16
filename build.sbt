@@ -19,7 +19,7 @@ val `api-server` = (project in file("api-server"))
     dockerUsername := Some("j5ik2o"),
     dockerExposedPorts ++= Seq(8080),
     run / fork := true,
-    javaAgents += "org.aspectj"            % "aspectjweaver"    % "1.8.13",
+    javaAgents += "org.aspectj"            % "aspectjweaver"    % "1.9.25.1",
     javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "runtime;test",
     Universal / javaOptions += "-Dorg.aspectj.tracing.factory=default",
     run / javaOptions ++= Seq(
