@@ -50,7 +50,7 @@ val `api-server` = (project in file("api-server"))
         )
       ),
       "org.slf4j"      % "jul-to-slf4j"    % "1.7.26",
-      "ch.qos.logback" % "logback-classic" % "1.2.11"
+      "ch.qos.logback" % "logback-classic" % "1.5.32"
     )
   )
 
@@ -121,7 +121,7 @@ lazy val `gatling-aggregate-runner` =
       dockerUpdateLatest := true,
       libraryDependencies ++= Seq(
         "org.slf4j"           % "slf4j-api"             % "1.7.36",
-        "ch.qos.logback"      % "logback-classic"       % "1.2.11",
+        "ch.qos.logback"      % "logback-classic"       % "1.5.32",
         "org.codehaus.janino" % "janino"                % "3.0.6",
         "com.iheart"         %% "ficus"                 % "1.4.6",
         "com.github.j5ik2o"  %% "reactive-aws-ecs-core" % "1.1.3",
