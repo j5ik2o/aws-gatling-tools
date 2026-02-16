@@ -5,7 +5,7 @@ addSbtPlugin("io.gatling" % "gatling-sbt" % "3.1.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.7.0")
 
-addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.4")
+addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.6")
 
 addSbtPlugin("com.mintbeans" % "sbt-ecr" % "0.15.0")
 
