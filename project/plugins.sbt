@@ -7,7 +7,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.7.0")
 
 addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.4")
 
-addSbtPlugin("com.mintbeans" % "sbt-ecr" % "0.15.0")
+addSbtPlugin("com.mintbeans" % "sbt-ecr" % "0.16.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
