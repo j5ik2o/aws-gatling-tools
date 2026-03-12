@@ -38,7 +38,7 @@ val `api-server` = (project in file("api-server"))
       "com.typesafe.akka"   %% "akka-http"                % "10.1.11",
       "com.typesafe.akka"   %% "akka-stream"              % akka26Version,
       "com.typesafe.akka"   %% "akka-slf4j"               % akka26Version,
-      "com.github.scopt"    %% "scopt"                    % "4.0.1",
+      "com.github.scopt"    %% "scopt"                    % "4.1.0",
       "net.logstash.logback" % "logstash-logback-encoder" % "4.11" excludeAll (
         ExclusionRule(
           organization = "com.fasterxml.jackson.core",
