@@ -20,7 +20,7 @@ val `api-server` = (project in file("api-server"))
     dockerExposedPorts ++= Seq(8080),
     run / fork := true,
     javaAgents += "org.aspectj"            % "aspectjweaver"    % "1.8.13",
-    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "runtime;test",
+    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.10" % "runtime;test",
     Universal / javaOptions += "-Dorg.aspectj.tracing.factory=default",
     run / javaOptions ++= Seq(
       s"-Dcom.sun.management.jmxremote.port=${sys.env.getOrElse("JMX_PORT", "8999")}",
