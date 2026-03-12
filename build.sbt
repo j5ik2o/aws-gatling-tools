@@ -122,7 +122,7 @@ lazy val `gatling-aggregate-runner` =
       libraryDependencies ++= Seq(
         "org.slf4j"           % "slf4j-api"             % "1.7.36",
         "ch.qos.logback"      % "logback-classic"       % "1.2.11",
-        "org.codehaus.janino" % "janino"                % "3.0.6",
+        "org.codehaus.janino" % "janino"                % "3.1.12",
         "com.iheart"         %% "ficus"                 % "1.4.6",
         "com.github.j5ik2o"  %% "reactive-aws-ecs-core" % "1.1.3",
         "org.scalaj"         %% "scalaj-http"           % "2.4.2"
